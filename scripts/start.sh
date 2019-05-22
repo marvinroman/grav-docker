@@ -3,7 +3,7 @@
 # Disable Strict Host checking for non interactive git clones
 
 mkdir -p -m 0700 /root/.ssh
-# Prevent config files from being filled to infinity by force of stop and restart the container 
+# Prevent config files from being filled to infinity by force of stop and restart the container
 echo "" > /root/.ssh/config
 echo -e "Host *\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
 
@@ -206,18 +206,59 @@ if [[ "$RUN_SCRIPTS" == "1" ]] ; then
 fi
 
 if [ -z "$SKIP_COMPOSER" ]; then
-    # Try auto install for composer
-    if [ -f "/var/www/html/composer.lock" ]; then
-        if [ "$APPLICATION_ENV" == "development" ]; then
-            composer global require hirak/prestissimo
-            composer install --working-dir=/var/www/html
-        else
-            composer global require hirak/prestissimo
-            composer install --no-dev --working-dir=/var/www/html
-        fi
+  # Try auto install for composer
+  if [ -f "/var/www/html/composer.lock" ]; then
+    if [ "$APPLICATION_ENV" == "development" ]; then
+      composer global require hirak/prestissimo
+      composer install --working-dir=/var/www/html
+    else
+      composer global require hirak/prestissimo
+      composer install --no-dev --working-dir=/var/www/html
     fi
+  fi
+fi
+
+# enable NAXSI firewall
+if [[ "$NAXSI" == "1" ]]; then
+  sed -i "s/# include \/etc\/nginx\/globals\/naxsi-site.rules/include \/etc\/nginx\/globals\/naxsi-site.rules/g" /etc/nginx/globals/grav.inc
+fi
+
+# enable PageSpeed module
+if [[ "$PAGESPEED" == "1" ]]; then
+  sed -i "s/# include \/etc\/nginx\/globals\/pagespeed.rules/include \/etc\/nginx\/globals\/pagespeed.rules/g" /etc/nginx/globals/grav.inc
+fi
+
+# enable fastcgi cache
+if [[ "$FASTCGI_CACHE" == "1" ]]; then
+  sed -i "s/# include \/etc\/nginx\/globals\/fastcgi_cache.inc/include \/etc\/nginx\/globals\/fastcgi_cache.inc/g" /etc/nginx/globals/grav.inc
+fi
+
+# enable NGINX debug headers
+if [[ "$NGINX_DEBUG_HEADERS" == "1" ]]; then
+  sed -i "s/# include \/etc\/nginx\/globals\/debug.inc/include \/etc\/nginx\/globals\/debug.inc/g" /etc/nginx/globals/grav.inc
+fi
+
+# enable ssl
+if [[ "$SSL_ENABLED" == "1" ]]; then
+
+  ls -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
+  if [[ "$SSL_LETS_ENCRYPT" == "1" ]]; then
+    if [[ -d "/etc/letsencrypt/live/" ]]; then
+      /usr/bin/letsencrypt-renew
+    else
+      /usr/bin/letsencrypt-setup
+    fi
+  fi
+
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/globals/ssl.inc
+
+  # redirect http to https
+  if [[ "$REDIRECT_SSL" == "1" ]]; then
+      rm -f /etc/nginx/sites-enabled/default.conf;
+      ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
+  fi
+  nginx -s reload
 fi
 
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
-
