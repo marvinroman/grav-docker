@@ -230,7 +230,6 @@ mkdir -p /etc/nginx/ssl/ && \
 rm -Rf /var/www/* && \
 mkdir /var/www/html/
 COPY etc /etc
-RUN ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
 
 # tweak php-fpm config
 RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
