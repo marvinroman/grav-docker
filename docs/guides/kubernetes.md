@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: example-app
-        image: richarvey/nginx-php-fpm:latest
+        image: magemonkey/grav-docker:latest
         imagePullPolicy: Always
         env:
           - name: SSH_KEY
