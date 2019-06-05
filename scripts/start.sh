@@ -260,5 +260,22 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
   nginx -s reload
 fi
 
+# if there is plugins then install each
+if [ ${#PLUGINS[@]} -gt 0 ]; then 
+  IFS=',';
+  for plugin in $PLUGINS; do 
+    ${webroot}/bin/gpm install -n $plugin;
+  done 
+  chown -R nginx.nginx $webroot;
+  IFS=' ';
+fi 
+
+# if theme specified then install 
+if [ -n "$THEME" ]; then 
+  ${webroot}/bin/gpm install -n $THEME;
+  chown -R nginx.nginx $webroot;
+fi 
+
+
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
