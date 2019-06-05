@@ -187,10 +187,6 @@ if [ ! -z "$PUID" ]; then
   deluser nginx
   addgroup -g ${PGID} nginx
   adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx -u ${PUID} nginx
-else
-  if [ -z "$SKIP_CHOWN" ]; then
-    chown -Rf nginx.nginx /var/www/html
-  fi
 fi
 
 # Run custom scripts
@@ -273,9 +269,11 @@ fi
 # if theme specified then install 
 if [ -n "$THEME" ]; then 
   ${webroot}/bin/gpm install -n $THEME;
-  chown -R nginx.nginx $webroot;
 fi 
 
+if [ -z "$SKIP_CHOWN" ]; then
+  chown -Rf nginx.nginx $webroot;
+fi
 
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
