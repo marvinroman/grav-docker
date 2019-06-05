@@ -262,9 +262,6 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
   php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
   php -r "unlink('composer-setup.php');"
 
-# install so that commands can be runned as nginx 
-RUN apk add --no-cache su-exec 
-
 # Install Grav w/Git Sync plugin
 RUN rm -rf /var/www/html
 RUN chown -R nginx:nginx /var/www
