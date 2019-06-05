@@ -41,5 +41,7 @@ SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
 NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the browser
 FASTCGI_CACHE | Set to 1 to enable fastcgi caching
+PLUGINS | Comma separated list of plugins you want installed
+THEME | Public theme you want installed from the Grav site
 NAXSI | Set to 1 to enable NAXSI web firewall @TODO not yet implemented
 PAGESPEED | Set to 1 to enable Pagespeed module @TODO not yet implemented
