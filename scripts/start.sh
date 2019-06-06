@@ -76,13 +76,16 @@ if [ -f /var/www/html/conf/nginx/nginx.conf ]; then
 fi
 
 if [ -f /var/www/html/conf/nginx/nginx-site.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site.conf /etc/nginx/sites-available/default.conf
+  cp /var/www/html/conf/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
 fi
 
 if [ -f /var/www/html/conf/nginx/nginx-site-ssl.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-available/default-ssl.conf
+  cp /var/www/html/conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
 fi
 
+if [ -n "$DOMAIN" ]; then 
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-enabled/default.conf;
+fi 
 
 # Prevent config files from being filled to infinity by force of stop and restart the container
 lastlinephpconf="$(grep "." /usr/local/etc/php-fpm.conf | tail -1)"
@@ -124,7 +127,9 @@ if [ -f /etc/nginx/sites-available/default-ssl.conf ]; then
 fi
 
 # Set the desired timezone
-echo date.timezone=$(cat /etc/TZ) > /usr/local/etc/php/conf.d/timezone.ini
+if [ -n "$TIMEZONE" ]; then 
+  echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
+fi 
 
 # Display errors in docker logs
 if [ ! -z "$PHP_ERRORS_STDERR" ]; then
@@ -236,8 +241,13 @@ fi
 
 # enable ssl
 if [[ "$SSL_ENABLED" == "1" ]]; then
+  if [ -z "$DOMAIN" ]; then 
+    echo "To enable SSL make sure to set DOMAIN";
+    exit 1;
+  fi
 
-  ls -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
+  ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
   if [[ "$SSL_LETS_ENCRYPT" == "1" ]]; then
     if [[ -d "/etc/letsencrypt/live/" ]]; then
       /usr/bin/letsencrypt-renew
@@ -246,11 +256,12 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
     fi
   fi
 
-  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/globals/ssl.inc
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/globals/ssl.inc;
 
   # redirect http to https
   if [[ "$REDIRECT_SSL" == "1" ]]; then
       rm -f /etc/nginx/sites-enabled/default.conf;
+      sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
       ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
   fi
   nginx -s reload
@@ -272,7 +283,7 @@ if [ -n "$THEME" ]; then
 fi 
 
 if [ -z "$SKIP_CHOWN" ]; then
-  chown -Rf nginx.nginx $webroot;
+  chown -R nginx.nginx $webroot;
 fi
 
 # Start supervisord and services
