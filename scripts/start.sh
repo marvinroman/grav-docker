@@ -283,6 +283,7 @@ if [ -n "$THEME" ]; then
 fi 
 
 if [ -z "$SKIP_CHOWN" ]; then
+  echo "Changed file ownership";
   chown -R nginx.nginx $webroot;
 fi
 
