@@ -43,5 +43,6 @@ NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the bro
 FASTCGI_CACHE | Set to 1 to enable fastcgi caching
 PLUGINS | Comma separated list of plugins you want installed
 THEME | Public theme you want installed from the Grav site
+TIMEZONE | Set container timezone
 NAXSI | Set to 1 to enable NAXSI web firewall @TODO not yet implemented
 PAGESPEED | Set to 1 to enable Pagespeed module @TODO not yet implemented
