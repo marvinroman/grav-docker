@@ -283,6 +283,7 @@ ADD errors/ /var/www/errors
 
 # Make cron scheduler script 
 RUN (crontab -l; echo "*	*	*	*	*	run-parts /etc/periodic/everymin") | crontab -
+RUN chmod a+x /etc/periodic/everymin/scheduler
 
 EXPOSE 443 80
 CMD ["/start.sh"]
