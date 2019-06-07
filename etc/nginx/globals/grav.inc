@@ -3,6 +3,17 @@ if ($request_method = POST) { set $skip_cache 1; }
 
 # include /etc/nginx/globals/pagespeed.rules;
 
+error_page 400 401 404 /40x.html;
+error_page 404 /404.html;
+error_page 500 /50x.html;
+
+location ^~ /(sad\.svg|50x\.html|40[x4]\.html)$ {
+    root  /var/www/errors;
+    expires 1M;
+    access_log off;
+    add_header Cache-Control "public";
+}
+
 location / {
     # include /etc/nginx/globals/naxsi-site.rules;
     absolute_redirect off;
@@ -66,7 +77,7 @@ location ~* /(system|vendor)/.*\.(txt|xml|md|html|yaml|yml|php|pl|py|cgi|twig|sh
 # deny running scripts inside user folder
 location ~* /user/.*\.(txt|md|yaml|yml|php|pl|py|cgi|twig|sh|bat)$ { return 403; }
 # deny access to specific files in the root folder
-location ~ /(LICENSE\.txt|composer\.lock|composer\.json|nginx\.conf|web\.config|htaccess\.txt|\.htaccess) { return 403; }
+location ~ /(LICENSE\.txt|composer\.lock|composer\.json|nginx\.conf|web\.config|htaccess\.txt|\.htaccess|CHANGELOG\.md|CODE_OF_CONDUCT\.md|CONTRIBUTING\.md|README\.md|codeception\.yml) { return 403; }
 ## End - Security
 
 
@@ -76,11 +87,6 @@ location /healthcheck {
     stub_status     on;
     keepalive_timeout 0;    # Disable HTTP keepalive
     return 200;
-}
-
-error_page 400 401 /40x.html;
-location = /40x.html {
-        root   /usr/share/nginx/html;
 }
 
 location ~ ^/(fpmstatus|ping)$ {
