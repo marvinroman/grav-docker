@@ -7,5 +7,4 @@ if [ ! -z "$WEBROOT" ]; then
 fi
 
 cd $webroot
-/usr/local/bin/php bin/grav scheduler
-chown nginx.nginx ${webroot}/user/config/scheduler.yaml
+su-exec nginx /usr/local/bin/php bin/grav scheduler

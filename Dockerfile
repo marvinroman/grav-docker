@@ -282,6 +282,7 @@ RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/let
 ADD errors/ /var/www/errors
 
 # Make cron scheduler script 
+RUN apk add --no-cache su-exec 
 RUN (crontab -l; echo "*	*	*	*	*	run-parts /etc/periodic/everymin") | crontab -
 RUN chmod a+x /etc/periodic/everymin/scheduler
 
