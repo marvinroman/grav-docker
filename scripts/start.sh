@@ -269,8 +269,10 @@ if [ -n "$THEME" ]; then
 fi 
 
 if [ -z "$SKIP_CHOWN" ]; then
-  echo "Changed file ownership";
+  echo "Changing file ownership";
   chown -R nginx.nginx $webroot;
+  echo "Changing directory permissions";
+  find $webroot -type d -exec chmod 755 {} \;
 fi
 
 # Run SMTP server to send mail
