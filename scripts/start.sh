@@ -271,15 +271,14 @@ fi
 if [ ${#PLUGINS[@]} -gt 0 ]; then 
   IFS=',';
   for plugin in $PLUGINS; do 
-    ${webroot}/bin/gpm install -n $plugin;
+    su-exec nginx ${webroot}/bin/gpm install -n $plugin;
   done 
-  chown -R nginx.nginx $webroot;
   IFS=' ';
 fi 
 
 # if theme specified then install 
 if [ -n "$THEME" ]; then 
-  ${webroot}/bin/gpm install -n $THEME;
+  su-exec nginx ${webroot}/bin/gpm install -n $THEME;
 fi 
 
 if [ -z "$SKIP_CHOWN" ]; then
