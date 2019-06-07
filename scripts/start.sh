@@ -291,7 +291,7 @@ fi
 if [[ "$EMAIL_SERVER" == "1" ]]; then 
 
   # Install Postfix
-  apk add --nocache postfix 
+  apk add --no-cache postfix 
 
   # add Postfix to supervisord config
   cat <<EOF >> /etc/supervisord.conf
