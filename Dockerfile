@@ -281,5 +281,8 @@ RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/let
 # Copy in NGINX error pages
 ADD errors/ /var/www/errors
 
+# Make cron scheduler script 
+RUN (crontab -l; echo "*	*	*	*	*	run-parts /etc/periodic/everymin") | crontab -
+
 EXPOSE 443 80
 CMD ["/start.sh"]

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+webroot=/var/www/html;
+
+if [ ! -z "$WEBROOT" ]; then
+    webroot=$WEBROOT
+fi
+
+cd $webroot
+/usr/local/bin/php bin/grav scheduler
+chown nginx.nginx ${webroot}/user/config/scheduler.yaml
