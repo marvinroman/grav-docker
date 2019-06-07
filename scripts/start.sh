@@ -206,19 +206,6 @@ if [[ "$RUN_SCRIPTS" == "1" ]] ; then
   fi
 fi
 
-if [ -z "$SKIP_COMPOSER" ]; then
-  # Try auto install for composer
-  if [ -f "/var/www/html/composer.lock" ]; then
-    if [ "$APPLICATION_ENV" == "development" ]; then
-      composer global require hirak/prestissimo
-      composer install --working-dir=/var/www/html
-    else
-      composer global require hirak/prestissimo
-      composer install --no-dev --working-dir=/var/www/html
-    fi
-  fi
-fi
-
 # enable NAXSI firewall
 if [[ "$NAXSI" == "1" ]]; then
   sed -i "s/# include \/etc\/nginx\/globals\/naxsi-site.rules/include \/etc\/nginx\/globals\/naxsi-site.rules/g" /etc/nginx/globals/grav.inc

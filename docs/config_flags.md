@@ -36,7 +36,6 @@ PUID | Set to UserID you want to use for nginx (helps permissions when using loc
 REMOVE_FILES | Use REMOVE_FILES=0 to prevent the script from clearing out /var/www/html (useful for working with local files)
 APPLICATION_ENV | Set this to development to prevent composer deleting local development dependencies
 SKIP_CHOWN | Set to 1 to avoid running chown -Rf on /var/www/html
-SKIP_COMPOSER | Set to 1 to avoid installing composer
 SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
 NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the browser
