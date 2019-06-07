@@ -3,7 +3,7 @@ if ($request_method = POST) { set $skip_cache 1; }
 
 # include /etc/nginx/globals/pagespeed.rules;
 
-error_page 400 401 404 /40x.html;
+error_page 400 401 403 /40x.html;
 error_page 404 /404.html;
 error_page 500 /50x.html;
 
