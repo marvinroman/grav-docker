@@ -287,5 +287,23 @@ if [ -z "$SKIP_CHOWN" ]; then
   chown -R nginx.nginx $webroot;
 fi
 
+# Run SMTP server to send mail
+if [[ "$EMAIL_SERVER" == "1" ]]; then 
+
+  # Install Postfix
+  apk add --nocache postfix 
+
+  # add Postfix to supervisord config
+  cat <<EOF >> /etc/supervisord.conf
+[program:postfix]
+process_name  = master
+directory	    = /etc/postfix
+command		    = /usr/sbin/postfix -c /etc/postfix start
+startsecs	    = 0
+autorestart   = false
+EOF
+
+fi 
+
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
