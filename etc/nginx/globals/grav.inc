@@ -7,7 +7,7 @@ error_page 400 401 403 /40x.html;
 error_page 404 /404.html;
 error_page 500 /50x.html;
 
-location ^~ /(sad\.svg|50x\.html|40[x4]\.html)$ {
+location ~ ^/(sad\.svg|50x\.html|40x\.html|404\.html)$ {
     root  /var/www/errors;
     expires 1M;
     access_log off;

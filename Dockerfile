@@ -280,6 +280,7 @@ RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/let
 
 # Copy in NGINX error pages
 ADD errors/ /var/www/errors
+RUN chown -R nginx.nginx /var/www/errors
 
 # Make cron scheduler script 
 RUN apk add --no-cache su-exec 
