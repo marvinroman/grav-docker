@@ -268,6 +268,7 @@ RUN chown -R nginx:nginx /var/www
 USER nginx
 RUN composer create-project getgrav/grav /var/www/html
 WORKDIR /var/www/html
+COPY favicon.ico /var/www/html/favicon.ico
 
 # Add Scripts
 USER root
