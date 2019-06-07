@@ -271,8 +271,10 @@ fi
 if [ -z "$SKIP_CHOWN" ]; then
   echo "Changing file ownership";
   chown -R nginx.nginx $webroot;
+  chown -R nginx.nginx /var/www/errors;
   echo "Changing directory permissions";
   find $webroot -type d -exec chmod 755 {} \;
+  find /var/www/errors -type f -exec chmod 644 {} \;
 fi
 
 # Run SMTP server to send mail
