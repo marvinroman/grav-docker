@@ -11,10 +11,10 @@ if [ -z "$GIT_NAME" ]; then
 fi
 
 # Try auto install for composer
-if [ -f "${WEBROOT}/composer.lock" ]; then
-  composer install --no-dev --working-dir=${WEBROOT}
+if [ -f "${webroot}/composer.lock" ]; then
+  composer install --no-dev --working-dir=${webroot}
 fi
 
-cd ${WEBROOT}
+cd ${webroot}
 git pull || exit 1
-chown -Rf nginx:nginx ${WEBROOT}
+chown -Rf nginx:nginx ${webroot}

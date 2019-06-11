@@ -19,7 +19,7 @@ fi
 
 # Set custom webroot
 if [ ! -z "$WEBROOT" ]; then
- sed -i "s#root /var/www/html;#root ${WEBROOT};#g" /etc/nginx/sites-available/default.conf
+ sed -i "s#root /var/www/html;#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf
 else
  webroot=/var/www/html
 fi
@@ -84,7 +84,7 @@ if [ -f /var/www/html/conf/nginx/nginx-site-ssl.conf ]; then
 fi
 
 if [ -n "$DOMAIN" ]; then 
-  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-enabled/default.conf;
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-*/default*.conf;
 fi 
 
 # Prevent config files from being filled to infinity by force of stop and restart the container
@@ -233,8 +233,6 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
     exit 1;
   fi
 
-  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
-  ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
   if [[ "$SSL_LETS_ENCRYPT" == "1" ]]; then
     if [[ -d "/etc/letsencrypt/live/" ]]; then
       /usr/bin/letsencrypt-renew
@@ -243,7 +241,8 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
     fi
   fi
 
-  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/globals/ssl.inc;
+  sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
+  ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
 
   # redirect http to https
   if [[ "$REDIRECT_SSL" == "1" ]]; then
