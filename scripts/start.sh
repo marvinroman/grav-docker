@@ -250,7 +250,6 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
       sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
       ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
   fi
-  nginx -s reload
 fi
 
 # if there is plugins then install each
