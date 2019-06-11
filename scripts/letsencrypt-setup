@@ -4,7 +4,7 @@
 if [ -z "$GIT_EMAIL" ] || [ -z "$DOMAIN" ]; then
  echo "You need the \$GIT_EMAIL and the \$DOMAIN Variables"
 else
- certbot certonly --nginx -d $DOMAIN --email $GIT_EMAIL -n
+ certbot certonly --nginx -d $DOMAIN --email $GIT_EMAIL -n --agree-tos
  ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
 
  supervisorctl restart nginx
