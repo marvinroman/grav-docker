@@ -218,6 +218,7 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
   rm composer-setup.php && \
   pip install -U pip && \
   pip install -U certbot && \
+  apk add certbot-nginx && \
   mkdir -p /etc/letsencrypt/webrootauth && \
   apk del gcc musl-dev linux-headers libffi-dev augeas-dev python-dev make autoconf
 #    apk del .sys-deps
