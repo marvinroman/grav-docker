@@ -234,7 +234,7 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
   fi
 
   if [[ "$SSL_LETS_ENCRYPT" == "1" ]]; then
-    if [[ -d "/etc/letsencrypt/live/" ]]; then
+    if [[ -d "/etc/letsencrypt/live/${DOMAIN}" ]]; then
       /usr/bin/letsencrypt-renew
     else
       /usr/bin/letsencrypt-setup
@@ -242,7 +242,6 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
   fi
 
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
-  ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf;
 
   # redirect http to https
   if [[ "$REDIRECT_SSL" == "1" ]]; then
@@ -250,6 +249,9 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
       sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
       ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
   fi
+
+  # make sure NGINX is stopped
+  /usr/sbin/nginx -s stop;
 fi
 
 # if there is plugins then install each
