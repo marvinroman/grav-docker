@@ -256,6 +256,7 @@ fi
 
 # if there is plugins then install each
 if [ ${#PLUGINS[@]} -gt 0 ]; then 
+  PLUGINS="${PLUGINS},error,markdown-notices,problems"
   IFS=',';
   for plugin in $PLUGINS; do 
     su-exec nginx ${webroot}/bin/gpm install -n $plugin;
