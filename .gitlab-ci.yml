@@ -17,7 +17,7 @@ build_latest:
   stage: build_latest
   script:
     - echo Build started on `date` for $CI_COMMIT_REF_NAME
-    # - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
     - docker build -f skeletons/open-publishing-space-site/Dockerfile -t $CI_REGISTRY_IMAGE:skeleton-open-publishing-space-v1.5.5 .
     - docker build -f skeletons/learn2-with-git-sync/Dockerfile -t $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2 .
     - docker images
