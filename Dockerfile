@@ -13,9 +13,59 @@ ENV DEVEL_KIT_MODULE_VERSION 0.3.0
 ENV LUAJIT_LIB=/usr/lib
 ENV LUAJIT_INC=/usr/include/luajit-2.1
 
-# resolves #166
-ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
-RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community gnu-libiconv
+# build deps
+ENV BUILD_DEPS "autoconf \
+  augeas-dev \
+  gcc \
+  gd-dev \
+  geoip-dev \
+  gnupg \
+  libc-dev \
+  libffi-dev \
+  libressl-dev \
+  libxslt-dev \
+  libzip-dev \
+  linux-headers \
+  luajit-dev \
+  make \
+  musl-dev \
+  pcre-dev \
+  perl-dev \
+  python-dev \
+  zlib-dev"
+
+# Install PHP required extensions
+ENV PHP_REQS "curl ctype dom json mbstring openssl session xml"
+RUN for req in ${PHP_REQS}; do apk add --no-cache php7-$req; done 
+RUN apk add --no-cache --virtual .php-libs \
+  freetype \
+  libjpeg-turbo \
+  libpng \
+  libwebp \
+  libxml2 \
+  libxpm \
+  libzip \
+  zlib
+
+RUN apk add --no-cache --virtual .php-build-deps \
+  freetype-dev \
+  libjpeg-turbo-dev \
+  libpng-dev \
+  libwebp-dev \
+  libxml2-dev \
+  libxpm-dev \
+  libzip-dev \
+  zlib-dev
+
+RUN docker-php-ext-configure gd \
+  --with-gd \
+  --with-freetype-dir=/usr/include/ \
+  --with-jpeg-dir=/usr/include/ \
+  --with-png-dir=/usr/include/ \
+  --with-webp-dir=/usr/include/ \
+  --with-xpm-dir=/usr/include/ && \
+  docker-php-ext-install -j$(nproc) exif gd simplexml zip && \
+  docker-php-source delete
 
 # @TODO: compile NGINX w/NAXSI
 # @TODO: compile NGINX w/pagespeed
@@ -71,22 +121,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   " \
   && addgroup -S nginx \
   && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
-  && apk add --no-cache --virtual .build-deps \
-  autoconf \
-  gcc \
-  libc-dev \
-  make \
-  libressl-dev \
-  pcre-dev \
-  zlib-dev \
-  linux-headers \
-  curl \
-  gnupg \
-  libxslt-dev \
-  gd-dev \
-  geoip-dev \
-  perl-dev \
-  luajit-dev \
+  && apk add --no-cache --virtual .build-deps $BUILD_DEPS \
   && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
   && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
   && curl -fSL https://github.com/simpl/ngx_devel_kit/archive/v$DEVEL_KIT_MODULE_VERSION.tar.gz -o ndk.tar.gz \
@@ -153,77 +188,30 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   | sort -u \
   )" \
   && apk add --no-cache --virtual .nginx-rundeps $runDeps \
-  && apk del .build-deps \
-  && apk del .gettext \
   && mv /tmp/envsubst /usr/local/bin/ \
-  \
   # forward request and error logs to docker log collector
   && ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
 
-RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
-  echo /etc/apk/respositories && \
-  apk update && apk upgrade &&\
-  apk add --no-cache \
+# Install system dependencies
+RUN apk add --no-cache --virtual .sys-deps \
   bash \
   openssh-client \
-  wget \
-  supervisor \
-  curl \
-  libcurl \
-  libzip-dev \
-  bzip2-dev \
-  imap-dev \
-  openssl-dev \
-  git \
-  python \
-  python-dev \
-  py-pip \
-  augeas-dev \
-  libressl-dev \
-  ca-certificates \
-  dialog \
-  autoconf \
-  make \
-  gcc \
-  musl-dev \
-  linux-headers \
-  libmcrypt-dev \
-  libpng-dev \
-  icu-dev \
-  libpq \
-  libxslt-dev \
-  libffi-dev \
-  freetype-dev \
-  sqlite-dev \
-  libjpeg-turbo-dev \
-  postgresql-dev && \
-  docker-php-ext-configure gd \
-  --with-gd \
-  --with-freetype-dir=/usr/include/ \
-  --with-png-dir=/usr/include/ \
-  --with-jpeg-dir=/usr/include/ && \
-  #curl iconv session
-  #docker-php-ext-install pdo_mysql pdo_sqlite mysqli mcrypt gd exif intl xsl json soap dom zip opcache && \
-  docker-php-ext-install iconv pdo_mysql pdo_sqlite pgsql pdo_pgsql mysqli gd exif intl xsl json soap dom zip opcache && \
-  pecl install xdebug-2.7.0RC1 && \
-  pecl install -o -f redis && \
-  echo "extension=redis.so" > /usr/local/etc/php/conf.d/redis.ini && \
-  docker-php-source delete && \
-  mkdir -p /etc/nginx && \
-  mkdir -p /var/www/app && \
+  rsync \
+  shadow \
+  su-exec \
+  supervisor && \
   mkdir -p /run/nginx && \
-  mkdir -p /var/log/supervisor && \
-  php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-  php composer-setup.php --quiet --install-dir=/usr/bin --filename=composer && \
-  rm composer-setup.php && \
-  pip install -U pip && \
-  pip install -U certbot && \
-  apk add certbot-nginx && \
-  mkdir -p /etc/letsencrypt/webrootauth && \
-  apk del gcc musl-dev linux-headers libffi-dev augeas-dev python-dev make autoconf
-#    apk del .sys-deps
-#    ln -s /usr/bin/php7 /usr/bin/php
+  mkdir -p /var/log/supervisor
+
+# Install certbot
+RUN apk add --no-cache certbot-nginx && \
+  mkdir -p /etc/letsencrypt/webrootauth
+
+# Cleanup 
+RUN apk del .build-deps && \
+  apk del .gettext && \
+  apk del .php-build-deps
 
 # nginx site conf
 RUN mkdir -p /etc/nginx/sites-available/ && \
@@ -269,7 +257,11 @@ RUN rm -rf /var/www/html
 RUN chown -R nginx:nginx /var/www
 USER nginx
 RUN composer create-project getgrav/grav /var/www/html
-RUN apk add --no-cache rsync 
+WORKDIR /var/www/html
+COPY favicon.ico /var/www/html/favicon.ico
+
+# Prep user copy for mounted user directories
+USER root
 RUN rsync -a \
   --include="user" \
   --include="user/*" \
@@ -282,11 +274,8 @@ RUN rsync -a \
   --exclude="*" \
   /var/www/html/ \
   /var/lib/grav 
-WORKDIR /var/www/html
-COPY favicon.ico /var/www/html/favicon.ico
 
 # Add Scripts
-USER root
 ADD scripts/start.sh /start.sh
 ADD scripts/pull /usr/bin/pull
 ADD scripts/push /usr/bin/push
@@ -299,7 +288,6 @@ ADD errors/ /var/www/errors
 RUN chown -R nginx.nginx /var/www/errors
 
 # Make cron scheduler script 
-RUN apk add --no-cache su-exec 
 RUN (crontab -l; echo "*	*	*	*	*	run-parts /etc/periodic/everymin") | crontab -
 RUN chmod a+x /etc/periodic/everymin/scheduler
 
