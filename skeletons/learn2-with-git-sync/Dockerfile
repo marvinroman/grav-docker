@@ -14,7 +14,7 @@ RUN unzip -q ${SKELETON}.zip
 RUN mv ${SKELETON} html 
 RUN rm -f ${SKELETON}.zip
 RUN mkdir -p /var/lib/grav/user
-RUN rsync -av --del \
+RUN rsync -a --del \
     /var/www/html/user/ \
     /var/lib/grav/user 
 

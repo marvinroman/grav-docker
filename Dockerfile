@@ -262,18 +262,10 @@ COPY favicon.ico /var/www/html/favicon.ico
 
 # Prep user copy for mounted user directories
 USER root
-RUN rsync -a \
-  --include="user" \
-  --include="user/*" \
-  --include="user/*/*"  \
-  --include="user/*/*/*" \
-  --include="user/*/*/*/*" \
-  --include="user/*/*/*/*/*" \
-  --include="user/*/*/*/*/*/*" \
-  --include="user/*/*/*/*/*/*/*" \
-  --exclude="*" \
-  /var/www/html/ \
-  /var/lib/grav 
+RUN mkdir -p /var/lib/grav/user
+RUN rsync -a --del \
+  /var/www/html/user/ \
+  /var/lib/grav/user 
 
 # Add Scripts
 ADD scripts/start.sh /start.sh
