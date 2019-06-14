@@ -228,6 +228,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
   echo "post_max_size = 100M"  >> ${php_vars} &&\
   echo "variables_order = \"EGPCS\""  >> ${php_vars} && \
   echo "memory_limit = 128M"  >> ${php_vars} && \
+  echo "max_execution_time = 30" >> ${php_vars} && \
   sed -i \
   -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" \
   -e "s/pm.max_children = 5/pm.max_children = 4/g" \
@@ -281,8 +282,8 @@ ADD errors/ /var/www/errors
 RUN chown -R nginx.nginx /var/www/errors
 
 # Make cron scheduler script 
-RUN (crontab -l; echo "*	*	*	*	*	run-parts /etc/periodic/everymin") | crontab -
-RUN chmod a+x /etc/periodic/everymin/scheduler
+RUN (crontab -l; echo "* * * * * run-parts /etc/periodic/everymin") | crontab -
+RUN find /etc/periodic -type f -exec chmod +x {} +
 
 EXPOSE 443 80
 CMD ["/start.sh"]
