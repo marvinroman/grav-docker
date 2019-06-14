@@ -1,6 +1,7 @@
 FROM php:7.3.5-fpm-alpine3.9
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
+LABEL version="v0.0.3"
 
 ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
