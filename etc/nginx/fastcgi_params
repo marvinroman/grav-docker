@@ -20,5 +20,10 @@ fastcgi_param  SERVER_ADDR        $server_addr;
 fastcgi_param  SERVER_PORT        $server_port;
 fastcgi_param  SERVER_NAME        $server_name;
 fastcgi_param  HTTP_PROXY         ""; # Added for grav
+
+#fastcgi_param COUNTRY_CODE $geoip2_data_country_code;
+#fastcgi_param COUNTRY_NAME $geoip2_data_country_name;
+#fastcgi_param CITY_NAME    $geoip2_data_city_name;
+
 # PHP only, required if PHP was built with --enable-force-cgi-redirect
 fastcgi_param  REDIRECT_STATUS    200;
