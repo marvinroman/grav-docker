@@ -21,16 +21,17 @@ The following flags are a list of all the currently supported options that can b
 Name | Description
 -------------------------|----------------------------------------------------------------------------------------------------------------
 WEBROOT | Change the default webroot directory from `/var/www/html` to your own setting
+PREP_VOLUMES | Copy backup user directory to mounted user directory
 ERRORS | Set to 1 to display PHP Errors in the browser
 HIDE_NGINX_HEADERS | Disable by setting to 0, default behaviour is to hide nginx + php version in headers
 PHP_MEM_LIMIT | Set higher PHP memory limit, default is 128 Mb
 PHP_POST_MAX_SIZE | Set a larger post_max_size, default is 100 Mb
 PHP_UPLOAD_MAX_FILESIZE | Set a larger upload_max_filesize, default is 100 Mb
 PHP_ERRORS_STDERR | Send php logs to docker logs
+PHP_MAX_EXECUTION_TIME
 DOMAIN | Set domain name for Lets Encrypt scripts
 REAL_IP_HEADER | set to 1 to enable real ip support in the logs
 REAL_IP_FROM | set to your CIDR block for real ip in logs
-RUN_SCRIPTS | Set to 1 to execute scripts
 PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
 PUID | Set to UserID you want to use for nginx (helps permissions when using local volume)
 REMOVE_FILES | Use REMOVE_FILES=0 to prevent the script from clearing out /var/www/html (useful for working with local files)
@@ -39,6 +40,7 @@ SKIP_CHOWN | Set to 1 to avoid running chown -Rf on /var/www/html
 SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
 NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the browser
+USE_GEOIP | Set to 1 for NGINX to pass COUNTRY_CODE, COUNTRY_NAME & CITY_NAME to PHP
 FASTCGI_CACHE | Set to 1 to enable fastcgi caching
 PLUGINS | Comma separated list of plugins you want installed
 THEME | Public theme you want installed from the Grav site
