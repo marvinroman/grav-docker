@@ -4,6 +4,7 @@ services:
 
 stages:
   - build_latest
+  - build_tags
   - build_skeleton_opss
   - build_skeleton_l2wgs
 
@@ -22,6 +23,17 @@ build_latest:
   only:
     - master
 
+build_tags:
+  stage: build_tags
+  script: 
+    - echo Build started on `date` for $CI_COMMIT_TAG
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+    - tags
+    - /^v[0-9.]+$/
+
 build_skeleton_opss:
   stage: build_skeleton_opss
   script:
@@ -30,6 +42,7 @@ build_skeleton_opss:
     - docker images
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
+    - tags
     - /^skeleton-open-publishing-space-.*$/
 
 build_skeleton_l2wgs:
@@ -40,4 +53,5 @@ build_skeleton_l2wgs:
     - docker images
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
+    - tags
     - /^skeleton-learn2-with-git-sync-.*$/
