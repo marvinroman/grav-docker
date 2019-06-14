@@ -129,6 +129,8 @@ fi
 # Set the desired timezone
 if [ -n "$TIMEZONE" ]; then 
   echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
+else 
+  echo date.timezone=UCT > /usr/local/etc/php/conf.d/timezone.ini
 fi 
 
 # Display errors in docker logs
