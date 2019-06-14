@@ -1,0 +1,5 @@
+#!/bin/sh
+DIR=/etc/geoip
+mkdir -p $DIR
+curl -sSL http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz | gunzip - > ${DIR}/GeoLite2-City.mmdb
+curl -sSL http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz | gunzip - > ${DIR}/GeoLite2-Country.mmdb
