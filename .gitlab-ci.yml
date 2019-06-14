@@ -18,8 +18,12 @@ build_latest:
   script:
     - echo Build started on `date` for $CI_COMMIT_REF_NAME
     - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - cd /skeletons/open-publishing-space-site && docker build -t $CI_REGISTRY_IMAGE:skeleton-open-publishing-space-v1.5.5
+    - cd /skeletons/learn2-with-git-sync && docker build -t $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2
     - docker images
     - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:skeleton-open-publishing-space-v1.5.5
+    - docker push $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2
   only:
     - master
 
@@ -32,23 +36,3 @@ build_tags:
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
     - /^v[0-9.]+$/
-
-build_skeleton_opss:
-  stage: build_skeleton_opss
-  script:
-    - echo Build started on `date` for $CI_COMMIT_TAG
-    - cd skeletons/open-publishing-space-site && docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
-    - docker images
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-  only:
-    - /^skeleton-open-publishing-space-.*$/
-
-build_skeleton_l2wgs:
-  stage: build_skeleton_l2wgs
-  script:
-    - echo Build started on `date` for $CI_COMMIT_TAG
-    - cd skeletons/learn2-with-git-sync && docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
-    - docker images
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-  only:
-    - /^skeleton-learn2-with-git-sync-.*$/
