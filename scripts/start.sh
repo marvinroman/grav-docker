@@ -126,6 +126,13 @@ if [ -f /etc/nginx/sites-available/default-ssl.conf ]; then
  fi
 fi
 
+if [[ "$USE_GEOIP" == "1" ]]; then 
+  sed -i "s/#include /etc/globals/geoip.inc;/include /etc/globals/geoip.inc;/" /etc/nginx/nginx.conf
+  sed -i "s/#fastcgi_param COUNTRY_CODE/fastcgi_param COUNTRY_CODE/" /etc/nginx/fastcgi_params
+  sed -i "s/#fastcgi_param COUNTRY_NAME/fastcgi_param COUNTRY_NAME/" /etc/nginx/fastcgi_params
+  sed -i "s/#fastcgi_param CITY_NAME/fastcgi_param CITY_NAME/" /etc/nginx/fastcgi_params
+fi 
+
 # Set the desired timezone
 if [ -n "$TIMEZONE" ]; then 
   echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
@@ -154,6 +161,14 @@ if [ ! -z "$PHP_UPLOAD_MAX_FILESIZE" ]; then
  sed -i "s/upload_max_filesize = 100M/upload_max_filesize= ${PHP_UPLOAD_MAX_FILESIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
+# Increase the max_execution_time
+if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
+ sed -i "s/max_execution_time = 30/max_execution_time = ${PHP_MAX_EXECUTION_TIME}/g" /usr/local/etc/php/conf.d/docker-vars.ini
+ sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout ${PHP_MAX_EXECUTION_TIME}s;/g" /etc/nginx/globals/grav.inc
+else
+ sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout 30s;/g" /etc/nginx/globals/grav.inc
+fi
+
 if [ ! -z "$PUID" ]; then
   if [ -z "$PGID" ]; then
     PGID=${PUID}
@@ -167,18 +182,6 @@ if [ ! -z "$PUID" ]; then
     chown -R nginx.nginx /var/www/errors;
     echo "Changing directory permissions";
     find $WEBROOT -type d -exec chmod 755 {} \;
-  fi
-fi
-
-# Run custom scripts
-if [[ "$RUN_SCRIPTS" == "1" ]] ; then
-  if [ -d "/var/www/html/scripts/" ]; then
-    # make scripts executable incase they aren't
-    chmod -Rf 750 /var/www/html/scripts/*; sync;
-    # run scripts in number order
-    for i in `ls /var/www/html/scripts/`; do /var/www/html/scripts/$i ; done
-  else
-    echo "Can't find script directory"
   fi
 fi
 
@@ -231,8 +234,56 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
 fi
 
 if [[ "$PREP_VOLUMES" == "1" ]]; then 
+  # copy backed up user directory to mounted user volume
   rsync -a /var/lib/grav/user/ $WEBROOT/user
 fi 
+
+# remove copy of grav user directory from container
+rm -rf /var/lib/grav 
+
+# replace user directory with bare git repo
+if [ -n "$USER_REPO" ]; then 
+  # remove user directory
+  rm -rf ${WEBROOT}/user 
+  # clone bare repo
+  git clone --bare --recurse-submodules $USER_REPO ${WEBROOT}/user
+fi 
+
+# replace user/pages directory with bare git repo
+if [ -n "$PAGES_REPO" ]; then 
+  # remove user directory
+  rm -rf ${WEBROOT}/user/pages 
+  # clone bare repo
+  git clone --bare --recurse-submodules $PAGES_REPO ${WEBROOT}/user/pages
+fi
+
+# replace user/config directory with bare git repo
+if [ -n "$CONFIG_REPO" ]; then 
+  # remove user directory
+  rm -rf ${WEBROOT}/user/config 
+  # clone bare repo
+  git clone --bare --recurse-submodules $CONFIG_REPO ${WEBROOT}/user/config
+fi
+
+# replace user/plugins directory with bare git repo
+if [ -n "$PLUGINS_REPO" ]; then 
+  # remove user directory
+  rm -rf ${WEBROOT}/user/plugins 
+  if [[ "$GIT_PUSH_DAILY" == "1" ]]; then 
+    git clone --bare --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
+  else 
+    # clone bare repo
+    git clone --bare --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
+  fi 
+fi
+
+# replace user/themes directory with bare git repo
+if [ -n "$THEMES_REPO" ]; then 
+  # remove user directory
+  rm -rf ${WEBROOT}/user/themes 
+  # clone bare repo
+  git clone --bare --recurse-submodules $THEMES_REPO ${WEBROOT}/user/themes
+fi
 
 # if there is plugins then install each
 if [ ${#PLUGINS[@]} -gt 0 ]; then 
