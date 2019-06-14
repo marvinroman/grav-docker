@@ -268,6 +268,19 @@ RUN rm -rf /var/www/html
 RUN chown -R nginx:nginx /var/www
 USER nginx
 RUN composer create-project getgrav/grav /var/www/html
+RUN apk add --no-cache rsync 
+RUN rsync -a \
+  --include="user" \
+  --include="user/*" \
+  --include="user/*/*"  \
+  --include="user/*/*/*" \
+  --include="user/*/*/*/*" \
+  --include="user/*/*/*/*/*" \
+  --include="user/*/*/*/*/*/*" \
+  --include="user/*/*/*/*/*/*/*" \
+  --exclude="*" \
+  /var/www/html/ \
+  /var/lib/grav 
 WORKDIR /var/www/html
 COPY favicon.ico /var/www/html/favicon.ico
 

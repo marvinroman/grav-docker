@@ -192,6 +192,14 @@ if [ ! -z "$PUID" ]; then
   deluser nginx
   addgroup -g ${PGID} nginx
   adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx -u ${PUID} nginx
+
+  if [ -z "$SKIP_CHOWN" ]; then
+    echo "Changing file ownership";
+    chown -R nginx.nginx $webroot;
+    chown -R nginx.nginx /var/www/errors;
+    echo "Changing directory permissions";
+    find $webroot -type d -exec chmod 755 {} \;
+  fi
 fi
 
 # Run custom scripts
@@ -254,6 +262,10 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
   /usr/sbin/nginx -s stop;
 fi
 
+if [[ "$PREP_VOLUMES" == "1" ]]; then 
+  rsync -a /var/lib/grav/user/ $webroot/user
+fi 
+
 # if there is plugins then install each
 if [ ${#PLUGINS[@]} -gt 0 ]; then 
   PLUGINS="${PLUGINS},error,markdown-notices,problems"
@@ -268,15 +280,6 @@ fi
 if [ -n "$THEME" ]; then 
   su-exec nginx ${webroot}/bin/gpm install -n $THEME;
 fi 
-
-if [ -z "$SKIP_CHOWN" ]; then
-  echo "Changing file ownership";
-  chown -R nginx.nginx $webroot;
-  chown -R nginx.nginx /var/www/errors;
-  echo "Changing directory permissions";
-  find $webroot -type d -exec chmod 755 {} \;
-  find /var/www/errors -type f -exec chmod 644 {} \;
-fi
 
 # Run SMTP server to send mail
 if [[ "$EMAIL_SERVER" == "1" ]]; then 
