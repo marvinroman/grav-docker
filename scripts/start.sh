@@ -246,7 +246,7 @@ if [ -n "$USER_REPO" ]; then
   # remove user directory
   rm -rf ${WEBROOT}/user 
   # clone bare repo
-  git clone --bare --recurse-submodules $USER_REPO ${WEBROOT}/user
+  git clone --recurse-submodules $USER_REPO ${WEBROOT}/user
 fi 
 
 # replace user/pages directory with bare git repo
@@ -254,7 +254,7 @@ if [ -n "$PAGES_REPO" ]; then
   # remove user directory
   rm -rf ${WEBROOT}/user/pages 
   # clone bare repo
-  git clone --bare --recurse-submodules $PAGES_REPO ${WEBROOT}/user/pages
+  git clone --recurse-submodules $PAGES_REPO ${WEBROOT}/user/pages
 fi
 
 # replace user/config directory with bare git repo
@@ -262,7 +262,7 @@ if [ -n "$CONFIG_REPO" ]; then
   # remove user directory
   rm -rf ${WEBROOT}/user/config 
   # clone bare repo
-  git clone --bare --recurse-submodules $CONFIG_REPO ${WEBROOT}/user/config
+  git clone --recurse-submodules $CONFIG_REPO ${WEBROOT}/user/config
 fi
 
 # replace user/plugins directory with bare git repo
@@ -270,10 +270,10 @@ if [ -n "$PLUGINS_REPO" ]; then
   # remove user directory
   rm -rf ${WEBROOT}/user/plugins 
   if [[ "$GIT_PUSH_DAILY" == "1" ]]; then 
-    git clone --bare --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
+    git clone --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
   else 
     # clone bare repo
-    git clone --bare --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
+    git clone --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
   fi 
 fi
 
@@ -282,7 +282,7 @@ if [ -n "$THEMES_REPO" ]; then
   # remove user directory
   rm -rf ${WEBROOT}/user/themes 
   # clone bare repo
-  git clone --bare --recurse-submodules $THEMES_REPO ${WEBROOT}/user/themes
+  git clone --recurse-submodules $THEMES_REPO ${WEBROOT}/user/themes
 fi
 
 # if there is plugins then install each
