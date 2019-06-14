@@ -17,11 +17,11 @@ if [ ! -z "$SSH_KEY" ]; then
  chmod 600 /root/.ssh/id_rsa
 fi
 
-# Set custom webroot
+# Set custom WEBROOT
 if [ ! -z "$WEBROOT" ]; then
  sed -i "s#root /var/www/html;#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf
 else
- webroot=/var/www/html
+ WEBROOT=/var/www/html
 fi
 
 # Setup git variables
@@ -154,53 +154,19 @@ if [ ! -z "$PHP_UPLOAD_MAX_FILESIZE" ]; then
  sed -i "s/upload_max_filesize = 100M/upload_max_filesize= ${PHP_UPLOAD_MAX_FILESIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
-# Enable xdebug
-XdebugFile='/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini'
-if [[ "$ENABLE_XDEBUG" == "1" ]] ; then
-  if [ -f $XdebugFile ]; then
-  	echo "Xdebug enabled"
-  else
-  	echo "Enabling xdebug"
-  	echo "If you get this error, you can safely ignore it: /usr/local/bin/docker-php-ext-enable: line 83: nm: not found"
-  	# see https://github.com/docker-library/php/pull/420
-    docker-php-ext-enable xdebug
-    # see if file exists
-    if [ -f $XdebugFile ]; then
-        # See if file contains xdebug text.
-        if grep -q xdebug.remote_enable "$XdebugFile"; then
-            echo "Xdebug already enabled... skipping"
-        else
-            echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > $XdebugFile # Note, single arrow to overwrite file.
-            echo "xdebug.remote_enable=1 "  >> $XdebugFile
-            echo "remote_host=host.docker.internal" >> $XdebugFile
-            echo "xdebug.remote_log=/tmp/xdebug.log"  >> $XdebugFile
-            echo "xdebug.remote_autostart=false "  >> $XdebugFile # I use the xdebug chrome extension instead of using autostart
-            # NOTE: xdebug.remote_host is not needed here if you set an environment variable in docker-compose like so `- XDEBUG_CONFIG=remote_host=192.168.111.27`.
-            #       you also need to set an env var `- PHP_IDE_CONFIG=serverName=docker`
-        fi
-    fi
-  fi
-else
-    if [ -f $XdebugFile ]; then
-        echo "Disabling Xdebug"
-      rm $XdebugFile
-    fi
-fi
-
 if [ ! -z "$PUID" ]; then
   if [ -z "$PGID" ]; then
     PGID=${PUID}
   fi
-  deluser nginx
-  addgroup -g ${PGID} nginx
-  adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx -u ${PUID} nginx
+  usermod -u $PUID nginx
+  groupmod -g $PGID nginx
 
   if [ -z "$SKIP_CHOWN" ]; then
     echo "Changing file ownership";
-    chown -R nginx.nginx $webroot;
+    chown -R nginx.nginx $WEBROOT;
     chown -R nginx.nginx /var/www/errors;
     echo "Changing directory permissions";
-    find $webroot -type d -exec chmod 755 {} \;
+    find $WEBROOT -type d -exec chmod 755 {} \;
   fi
 fi
 
@@ -265,7 +231,7 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
 fi
 
 if [[ "$PREP_VOLUMES" == "1" ]]; then 
-  rsync -a /var/lib/grav/user/ $webroot/user
+  rsync -a /var/lib/grav/user/ $WEBROOT/user
 fi 
 
 # if there is plugins then install each
@@ -273,14 +239,14 @@ if [ ${#PLUGINS[@]} -gt 0 ]; then
   PLUGINS="${PLUGINS},error,markdown-notices,problems"
   IFS=',';
   for plugin in $PLUGINS; do 
-    su-exec nginx ${webroot}/bin/gpm install -n $plugin;
+    su-exec nginx ${WEBROOT}/bin/gpm install -n $plugin;
   done 
   IFS=' ';
 fi 
 
 # if theme specified then install 
 if [ -n "$THEME" ]; then 
-  su-exec nginx ${webroot}/bin/gpm install -n $THEME;
+  su-exec nginx ${WEBROOT}/bin/gpm install -n $THEME;
 fi 
 
 # Run SMTP server to send mail
