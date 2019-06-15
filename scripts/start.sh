@@ -1,28 +1,5 @@
 #!/bin/bash
 
-# Disable Strict Host checking for non interactive git clones
-
-mkdir -p -m 0700 /root/.ssh
-# Prevent config files from being filled to infinity by force of stop and restart the container
-echo "" > /root/.ssh/config
-echo -e "Host *\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
-
-if [[ "$GIT_USE_SSH" == "1" ]] ; then
-  echo -e "Host *\n\tUser git\n\tIdentityFile /root/.ssh/id_rsa\n\n" >> /root/.ssh/config
-  cat /root/.ssh/config
-
-  if [ -z "$SSH_KEY" ]; then
-    echo "SSH_KEY must be set when GIT_USE_SSH=1"
-    exit 1
-  fi
-fi
-
-if [ ! -z "$SSH_KEY" ]; then
-    echo $SSH_KEY > /root/.ssh/id_rsa.base64
-    base64 -d /root/.ssh/id_rsa.base64 > /root/.ssh/id_rsa
-    chmod 600 /root/.ssh/id_rsa
-fi 
-
 # Set custom WEBROOT
 if [ ! -z "$WEBROOT" ]; then
   echo "Changing root from /var/www/html to ${WEBROOT}";
@@ -31,14 +8,7 @@ else
   WEBROOT=/var/www/html;
 fi
 
-# Setup git variables
-if [ ! -z "$GIT_EMAIL" ]; then
- git config --global user.email "$GIT_EMAIL"
-fi
-if [ ! -z "$GIT_NAME" ]; then
- git config --global user.name "$GIT_NAME"
- git config --global push.default simple
-fi
+source /usr/lib/git/git-setup.lib
 
 # Prepare user volume if mounted
 if [[ "$PREP_USER_VOLUME" == "1" ]]; then 
@@ -49,81 +19,8 @@ fi
 # remove copy of grav user directory from container
 rm -rf /var/lib/grav 
 
-pull_repo() {
-
-  # Overwrite default git variables with repo specific variables
-  if [ -n "$GIT_VARIABLES" ]; then 
-    for VARS in $GIT_VARIABLES; do 
-      IFS=':' read -ra VARS <<< "$VARS"
-      VAR0=${VARS[0]}
-      VAR1=${VARS[1]}
-      declare "${VAR1}"="${!VAR0}"
-      IFS=' '
-    done
-  fi 
-
-  # Pull down code from git for our site!
-  if [ ! -z "$GIT_REPO" ]; then
-
-    # Set branch to master if not set
-    if [ -z "$GIT_BRANCH" ]; then
-      GIT_BRANCH="master"
-    fi
-
-    if [ ! -z "$GIT_USERNAME" ] && [ ! -z "$GIT_PERSONAL_TOKEN" ] && [ "$GIT_USE_SSH" != "1" ]; then
-      GIT_REPO=" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
-    fi
-
-    # Dont pull code down if the .git folder exists
-    if [ -d "${GIT_DIR}/.git" ]; then
-      cd ${GIT_DIR}
-      git remote add origin ${GIT_REPO} || git remote set-url origin ${GIT_REPO}
-      git pull origin ${GIT_BRANCH} || exit 1
-      git checkout ${GIT_BRANCH} || exit 1
-      git submodule update --recursive || exit 1
-    else 
-      rm -rf ${GIT_DIR}/* && rm -rf ${GIT_DIR}/.*
-      git clone ${GIT_BARE} -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
-    fi
-
-    cd ${GIT_DIR}
-    if [ ! -z "$GIT_TAG" ]; then
-      git checkout ${GIT_TAG} || exit 1
-    fi
-    if [ ! -z "$GIT_COMMIT" ]; then
-      git checkout ${GIT_COMMIT} || exit 1
-    fi
-  fi
-}
-
-GIT_DIR=$WEBROOT
-pull_repo
-
-# Pull /user directory repo
-declare -a GIT_VARIABLES  
-GIT_VARIABLES=("USRDIR_GIT_REPO:GIT_REPO" "USRDIR_GIT_USERNAME:GIT_USERNAME" "USRDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "USRDIR_GIT_BRANCH:GIT_BRANCH" "USRDIR_GIT_TAG:GIT_TAG" "USRDIR_GIT_COMMIT:GIT_COMMIT" "USRDIR_GIT_BARE:GIT_BARE")
-GIT_DIR=${WEBROOT}/user
-pull_repo
-
-# Pull /user/pages directory repo
-GIT_VARIABLES=("PGDIR_GIT_REPO:GIT_REPO" "PGDIR_GIT_USERNAME:GIT_USERNAME" "PGDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "PGDIR_GIT_BRANCH:GIT_BRANCH" "PGDIR_GIT_TAG:GIT_TAG" "PGDIR_GIT_COMMIT:GIT_COMMIT" "PGDIR_GIT_BARE:GIT_BARE")
-GIT_DIR=${WEBROOT}/user/pages
-pull_repo
-
-# Pull /user/config directory repo
-GIT_VARIABLES=("CDIR_GIT_REPO:GIT_REPO" "CDIR_GIT_USERNAME:GIT_USERNAME" "CDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "CDIR_GIT_BRANCH:GIT_BRANCH" "CDIR_GIT_TAG:GIT_TAG" "CDIR_GIT_COMMIT:GIT_COMMIT" "CDIR_GIT_BARE:GIT_BARE")
-GIT_DIR=${WEBROOT}/user/config
-pull_repo
-
-# Pull /user/plugins directory repo
-GIT_VARIABLES=("PLDIR_GIT_REPO:GIT_REPO" "PLDIR_GIT_USERNAME:GIT_USERNAME" "PLDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "PLDIR_GIT_BRANCH:GIT_BRANCH" "PLDIR_GIT_TAG:GIT_TAG" "PLDIR_GIT_COMMIT:GIT_COMMIT" "PLDIR_GIT_BARE:GIT_BARE")
-GIT_DIR=${WEBROOT}/user/plugins
-pull_repo
-
-# Pull /user/themes directory repo
-GIT_VARIABLES=("THDIR_GIT_REPO:GIT_REPO" "THDIR_GIT_USERNAME:GIT_USERNAME" "THDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "THDIR_GIT_BRANCH:GIT_BRANCH" "THDIR_GIT_TAG:GIT_TAG" "THDIR_GIT_COMMIT:GIT_COMMIT" "THDIR_GIT_BARE:GIT_BARE")
-GIT_DIR=${WEBROOT}/user/themes
-pull_repo
+# Run git pull script
+/usr/bin/pull
 
 # Enable custom nginx config files if they exist
 if [ -f ${WEBROOT}/conf/nginx/nginx.conf ]; then

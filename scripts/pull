@@ -1,20 +1,43 @@
 #!/bin/bash
 
-if [ -z "$GIT_EMAIL" ]; then
- echo "You need to pass the \$GIT_EMAIL variable to the container for this to work"
- exit
+# Set custom WEBROOT
+if [ -z "$WEBROOT" ]; then
+  WEBROOT=/var/www/html;
 fi
 
-if [ -z "$GIT_NAME" ]; then
- echo "You need to pass the \$GIT_NAME variable to the container for this to work"
- exit
+source /usr/lib/git/git-setup.lib
+GIT_DIR=${WEBROOT}/user
+
+# Pull down code from git for our site!
+if [ ! -z "$GIT_REPO" ]; then
+
+  # Set branch to master if not set
+  if [ -z "$GIT_BRANCH" ]; then
+    GIT_BRANCH="master"
+  fi
+
+  if [ ! -z "$GIT_USERNAME" ] && [ ! -z "$GIT_PERSONAL_TOKEN" ] && [ "$GIT_USE_SSH" != "1" ]; then
+    GIT_REPO=" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
+  fi
+
+  # Dont pull code down if the .git folder exists
+  if [ -d "${GIT_DIR}/.git" ]; then
+    cd ${GIT_DIR}
+    git remote add origin ${GIT_REPO} || git remote set-url origin ${GIT_REPO}
+    git pull origin ${GIT_BRANCH} || exit 1
+    git submodule update --recursive || exit 1
+  else 
+    rm -rf ${GIT_DIR}/
+    git clone ${GIT_BARE} -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
+  fi
+
+  cd ${GIT_DIR}
+  if [ ! -z "$GIT_TAG" ]; then
+    git checkout ${GIT_TAG} || exit 1
+  fi
+  if [ ! -z "$GIT_COMMIT" ]; then
+    git checkout ${GIT_COMMIT} || exit 1
+  fi
 fi
 
-# Try auto install for composer
-if [ -f "${webroot}/composer.lock" ]; then
-  composer install --no-dev --working-dir=${webroot}
-fi
-
-cd ${webroot}
-git pull || exit 1
-chown -Rf nginx:nginx ${webroot}
+chown -R nginx.nginx ${GIT_DIR}
