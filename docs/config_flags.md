@@ -3,25 +3,81 @@ The following flags are a list of all the currently supported options that can b
 
 ### Git
 
-| Name               | Description                                                                                                                                                                                                                |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| GIT_REPO           | URL to the repository containing your source code. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`) |
-| GIT_BRANCH         | Select a specific branch (optional)                                                                                                                                                                                        |
-| GIT_TAG            | Specify a specific git tag (optional)                                                                                                                                                                                      |
-| GIT_COMMIT         | Specify a specific git commit (optional)                                                                                                                                                                                   |
-| GIT_EMAIL          | Set your email for code pushing (required for git to work)                                                                                                                                                                 |
-| GIT_NAME           | Set your name for code pushing (required for git to work)                                                                                                                                                                  |
-| GIT_USE_SSH        | Set this to 1 if you want to use git over SSH (instead of HTTP), useful if you want to use Bitbucket instead of GitHub                                                                                                     |
-| SSH_KEY            | Private SSH deploy key for your repository base64 encoded (requires write permissions for pushing)                                                                                                                         |
-| GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access)                                                                                                                                                 |
-| GIT_USERNAME       | Git username for use with personal tokens. (required for HTTPS git access)                                                                                                                                                 |
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GIT_USE_SSH | Set this to 1 if you want to use git over SSH (instead of HTTP), useful if you want to use Bitbucket instead of GitHub  
+GIT_EMAIL | Set your email for code pushing (required for git to work)  
+GIT_NAME | Set your name for code pushing (required for git to work)  
+GIT_REPO | URL to the repository containing your source code. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+GIT_BRANCH | Select a specific branch (optional)  
+GIT_BARE | Set to 1 to clone as a bare repo  
+GIT_TAG | Specify a specific git tag (optional)  
+GIT_COMMIT | Specify a specific git commit (optional)  
+SSH_KEY | Private SSH deploy key for your repository base64 encoded (requires write permissions for pushing)  
+GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access)  
+GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access)  
+
+### Git for directory /user
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USRDIR_GIT_BARE | Select a specific branch (optional) for `/user` repo  
+USRDIR_GIT_BRANCH | Select a specific branch (optional) for `/user` repo  
+USRDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user` repo  
+USRDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user` repo  
+USRDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user` repo  
+USRDIR_GIT_REPO | URL to the repository containing your source code for the `/user` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+USRDIR_GIT_TAG | Specify a specific git tag (optional) for `/user` repo  
+
+### Git for directory /user/pages
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PGDIR_GIT_BARE | Select a specific branch (optional) for `/user/pages` repo  
+PGDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/pages` repo  
+PGDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/pages` repo  
+PGDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/pages` repo  
+PGDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/pages` repo  
+PGDIR_GIT_REPO | URL to the repository containing your source code for the `/user/pages` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+PGDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/pages` repo  
+
+### Git for directory /user/config
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CDIR_GIT_BARE | Select a specific branch (optional) for `/user/config` repo  
+CDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/config` repo  
+CDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/config` repo  
+CDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/config` repo  
+CDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/config` repo  
+CDIR_GIT_REPO | URL to the repository containing your source code for the `/user/config` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+CDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/config` repo  
+
+### Git for directory /user/plugins
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PLDIR_GIT_BARE | Select a specific branch (optional) for `/user/plugins` repo  
+PLDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/plugins` repo  
+PLDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/plugins` repo  
+PLDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/plugins` repo  
+PLDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/plugins` repo  
+PLDIR_GIT_REPO | URL to the repository containing your source code for the `/user/plugins` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+PLDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/plugins` repo  
+
+### Git for directory /user/themes
+Name | Description
+--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+THDIR_GIT_BARE | Select a specific branch (optional) for `/user/themes` repo  
+THDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/themes` repo  
+THDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/themes` repo  
+THDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/themes` repo  
+THDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/themes` repo  
+THDIR_GIT_REPO | URL to the repository containing your source code for the `/user/themes` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
+THDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/themes` repo  
 
 ### Others
 
 Name | Description
 -------------------------|----------------------------------------------------------------------------------------------------------------
 WEBROOT | Change the default webroot directory from `/var/www/html` to your own setting
-PREP_VOLUMES | Copy backup user directory to mounted user directory
+PREP_USER_VOLUME | Copy backup of user directory to mounted user directory
 ERRORS | Set to 1 to display PHP Errors in the browser
 HIDE_NGINX_HEADERS | Disable by setting to 0, default behaviour is to hide nginx + php version in headers
 PHP_MEM_LIMIT | Set higher PHP memory limit, default is 128 Mb
