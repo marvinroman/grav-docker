@@ -1,4 +1,4 @@
-FROM php:7.3.5-fpm-alpine3.9
+FROM php:7.3.6-fpm-alpine3.9
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
 LABEL version="v0.0.3"
@@ -34,6 +34,10 @@ ENV BUILD_DEPS "autoconf \
   python-dev \
   zlib-dev"
 
+# Iconv fix see (https://github.com/docker-library/php/issues/240)
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ gnu-libiconv
+ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
+
 # Install PHP required extensions
 ENV PHP_REQS "curl ctype dom json mbstring openssl session xml"
 RUN for req in ${PHP_REQS}; do apk add --no-cache php7-$req; done 
@@ -64,7 +68,7 @@ RUN docker-php-ext-configure gd \
   --with-png-dir=/usr/include/ \
   --with-webp-dir=/usr/include/ \
   --with-xpm-dir=/usr/include/ && \
-  docker-php-ext-install -j$(nproc) exif gd simplexml zip && \
+  docker-php-ext-install -j$(nproc) exif gd iconv simplexml zip && \
   docker-php-source delete
 
 # @TODO: compile NGINX w/NAXSI
@@ -195,6 +199,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 RUN apk add --no-cache --virtual .sys-deps \
   bash \
   git \
+  inotify-tools \
   openssh-client \
   rsync \
   shadow \
@@ -279,16 +284,18 @@ RUN (crontab -l; echo "* * * * * run-parts /etc/periodic/everymin") | crontab -
 RUN find /etc/periodic -type f -exec chmod +x {} +
 
 # Add Scripts
+RUN mkdir -p /usr/lib/git
 ADD scripts/pull /usr/bin/pull
 ADD scripts/push /usr/bin/push
 ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
 ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
+ADD scripts/git-setup.lib /usr/lib/git/git-setup.lib
 ADD scripts/start.sh /start.sh
 RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
 
 # forward request and error logs to docker log collector
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-#  && ln -sf /dev/stderr /var/log/nginx/error.log
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+  && ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 443 80
 CMD ["/start.sh"]
