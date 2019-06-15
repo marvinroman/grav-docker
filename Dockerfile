@@ -269,14 +269,6 @@ RUN rsync -a --del \
   /var/www/html/user/ \
   /var/lib/grav/user 
 
-# Add Scripts
-ADD scripts/start.sh /start.sh
-ADD scripts/pull /usr/bin/pull
-ADD scripts/push /usr/bin/push
-ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
-ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
-RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
-
 # Copy in NGINX error pages
 ADD errors/ /var/www/errors
 RUN chown -R nginx.nginx /var/www/errors
@@ -284,6 +276,14 @@ RUN chown -R nginx.nginx /var/www/errors
 # Make cron scheduler script 
 RUN (crontab -l; echo "* * * * * run-parts /etc/periodic/everymin") | crontab -
 RUN find /etc/periodic -type f -exec chmod +x {} +
+
+# Add Scripts
+ADD scripts/pull /usr/bin/pull
+ADD scripts/push /usr/bin/push
+ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
+ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
+ADD scripts/start.sh /start.sh
+RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
 
 EXPOSE 443 80
 CMD ["/start.sh"]
