@@ -1,21 +1,41 @@
 #!/bin/bash
 
-timestamp() {
-  date +"%D %T"
-}
-
-if [ -z "$GIT_EMAIL" ]; then
- echo "You need to pass the \$GIT_EMAIL variable to the container for this to work"
- exit
+# Set custom WEBROOT
+if [ -z "$WEBROOT" ]; then
+  WEBROOT=/var/www/html;
 fi
 
-if [ -z "$GIT_NAME" ]; then
- echo "You need to pass the \$GIT_NAME variable to the container for this to work"
- exit
+source /usr/lib/git/git-setup.lib
+GIT_DIR=${WEBROOT}/user
+
+# Pull down code from git for our site!
+if [ ! -z "$GIT_REPO" ]; then
+
+  # Set branch to master if not set
+  if [ -z "$GIT_BRANCH" ]; then
+    GIT_BRANCH="master"
+  fi
+
+  if [ ! -z "$GIT_USERNAME" ] && [ ! -z "$GIT_PERSONAL_TOKEN" ] && [ "$GIT_USE_SSH" != "1" ]; then
+    GIT_REPO=" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
+  fi
+
+  cat << EOF > ${GIT_DIR}/.gitignore
+data/*
+!data/.gitkeep
+EOF
+
+  cd ${GIT_DIR}
+
+  # Dont pull code down if the .git folder exists
+  if [ ! -d "${GIT_DIR}/.git" ]; then
+    git init || exit 1
+  fi
+
+  git add . || exit 1
+  git commit -a -m 'automated push' || exit 1
+  git remote add origin ${GIT_REPO} || git remote set-url origin ${GIT_REPO}
+  git push origin ${GIT_BRANCH} || exit 1
 fi
 
-ts=$(timestamp)
-cd ${webroot}
-git add .
-git commit -a -m "push from container $ts"
-git push
+chown -R nginx.nginx ${GIT_DIR}/
