@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Disable Strict Host checking for non interactive git clones
 
@@ -8,20 +8,26 @@ echo "" > /root/.ssh/config
 echo -e "Host *\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
 
 if [[ "$GIT_USE_SSH" == "1" ]] ; then
-  echo -e "Host *\n\tUser ${GIT_USERNAME}\n\n" >> /root/.ssh/config
+  echo -e "Host *\n\tUser git\n\tIdentityFile /root/.ssh/id_rsa\n\n" >> /root/.ssh/config
+  cat /root/.ssh/config
+
+  if [ -z "$SSH_KEY" ]; then
+    echo "SSH_KEY must be set when GIT_USE_SSH=1"
+    exit 1
+  fi
 fi
 
 if [ ! -z "$SSH_KEY" ]; then
- echo $SSH_KEY > /root/.ssh/id_rsa.base64
- base64 -d /root/.ssh/id_rsa.base64 > /root/.ssh/id_rsa
- chmod 600 /root/.ssh/id_rsa
-fi
+    echo $SSH_KEY > /root/.ssh/id_rsa.base64
+    base64 -d /root/.ssh/id_rsa.base64 > /root/.ssh/id_rsa
+    chmod 600 /root/.ssh/id_rsa
+fi 
 
 # Set custom WEBROOT
 if [ ! -z "$WEBROOT" ]; then
- sed -i "s#root /var/www/html;#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf
+ sed -i "s#root ${WEBROOT};#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf
 else
- WEBROOT=/var/www/html
+ WEBROOT=${WEBROOT}
 fi
 
 # Setup git variables
@@ -33,54 +39,103 @@ if [ ! -z "$GIT_NAME" ]; then
  git config --global push.default simple
 fi
 
-# Dont pull code down if the .git folder exists
-if [ ! -d "/var/www/html/.git" ]; then
- # Pull down code from git for our site!
- if [ ! -z "$GIT_REPO" ]; then
-   # Remove the test index file if you are pulling in a git repo
-   if [ ! -z ${REMOVE_FILES} ] && [ ${REMOVE_FILES} == 0 ]; then
-     echo "skiping removal of files"
-   else
-     rm -Rf /var/www/html/*
-   fi
-   GIT_COMMAND='git clone '
-   if [ ! -z "$GIT_BRANCH" ]; then
-     GIT_COMMAND=${GIT_COMMAND}" -b ${GIT_BRANCH}"
-   fi
+# Prepare user volume if mounted
+if [[ "$PREP_USER_VOLUME" == "1" ]]; then 
+  # copy backed up user directory to mounted user volume
+  rsync -a /var/lib/grav/user/ $WEBROOT/user
+fi 
 
-   if [ -z "$GIT_USERNAME" ] && [ -z "$GIT_PERSONAL_TOKEN" ]; then
-     GIT_COMMAND=${GIT_COMMAND}" ${GIT_REPO}"
-   else
-    if [[ "$GIT_USE_SSH" == "1" ]]; then
-      GIT_COMMAND=${GIT_COMMAND}" ${GIT_REPO}"
-    else
-      GIT_COMMAND=${GIT_COMMAND}" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
+# remove copy of grav user directory from container
+rm -rf /var/lib/grav 
+
+pull_repo() {
+
+  # Overwrite default git variables with repo specific variables
+  if [ -n "$GIT_VARIABLES" ]; then 
+    for VARS in $GIT_VARIABLES; do 
+      IFS=':' read -ra VARS <<< "$VARS"
+      VAR0=${VARS[0]}
+      VAR1=${VARS[1]}
+      declare "${VAR1}"="${!VAR0}"
+      echo "${VAR1}: ${!VAR1}"
+      IFS=' '
+    done
+  fi 
+
+  # Pull down code from git for our site!
+  if [ ! -z "$GIT_REPO" ]; then
+
+    # Set branch to master if not set
+    if [ -z "$GIT_BRANCH" ]; then
+      GIT_BRANCH="master"
     fi
-   fi
-   ${GIT_COMMAND} /var/www/html || exit 1
-   if [ ! -z "$GIT_TAG" ]; then
-     git checkout ${GIT_TAG} || exit 1
-   fi
-   if [ ! -z "$GIT_COMMIT" ]; then
-     git checkout ${GIT_COMMIT} || exit 1
-   fi
-   if [ -z "$SKIP_CHOWN" ]; then
-     chown -Rf nginx.nginx /var/www/html
-   fi
- fi
-fi
+
+    if [ ! -z "$GIT_USERNAME" ] && [ ! -z "$GIT_PERSONAL_TOKEN" ] && [ "$GIT_USE_SSH" != "1" ]; then
+      GIT_REPO=" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
+    fi
+
+    # Dont pull code down if the .git folder exists
+    if [ -d "${GIT_DIR}/.git" ]; then
+      cd ${GIT_DIR}
+      git remote add origin ${GIT_REPO} || git remote set-url origin ${GIT_REPO}
+      git pull origin ${GIT_BRANCH} || exit 1
+      git checkout ${GIT_BRANCH} || exit 1
+      git submodule update --recursive || exit 1
+    else 
+      rm -rf ${GIT_DIR}
+      git clone ${GIT_BARE} -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
+    fi
+
+    cd ${GIT_DIR}
+    if [ ! -z "$GIT_TAG" ]; then
+      git checkout ${GIT_TAG} || exit 1
+    fi
+    if [ ! -z "$GIT_COMMIT" ]; then
+      git checkout ${GIT_COMMIT} || exit 1
+    fi
+  fi
+}
+
+GIT_DIR=$WEBROOT
+pull_repo
+
+# Pull /user directory repo
+declare -a GIT_VARIABLES  
+GIT_VARIABLES=("USRDIR_GIT_REPO:GIT_REPO" "USRDIR_GIT_USERNAME:GIT_USERNAME" "USRDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "USRDIR_GIT_BRANCH:GIT_BRANCH" "USRDIR_GIT_TAG:GIT_TAG" "USRDIR_GIT_COMMIT:GIT_COMMIT" "USRDIR_GIT_BARE:GIT_BARE")
+GIT_DIR=${WEBROOT}/user
+pull_repo
+
+# Pull /user/pages directory repo
+GIT_VARIABLES=("PGDIR_GIT_REPO:GIT_REPO" "PGDIR_GIT_USERNAME:GIT_USERNAME" "PGDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "PGDIR_GIT_BRANCH:GIT_BRANCH" "PGDIR_GIT_TAG:GIT_TAG" "PGDIR_GIT_COMMIT:GIT_COMMIT" "PGDIR_GIT_BARE:GIT_BARE")
+GIT_DIR=${WEBROOT}/user/pages
+pull_repo
+
+# Pull /user/config directory repo
+GIT_VARIABLES=("CDIR_GIT_REPO:GIT_REPO" "CDIR_GIT_USERNAME:GIT_USERNAME" "CDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "CDIR_GIT_BRANCH:GIT_BRANCH" "CDIR_GIT_TAG:GIT_TAG" "CDIR_GIT_COMMIT:GIT_COMMIT" "CDIR_GIT_BARE:GIT_BARE")
+GIT_DIR=${WEBROOT}/user/config
+pull_repo
+
+# Pull /user/plugins directory repo
+GIT_VARIABLES=("PLDIR_GIT_REPO:GIT_REPO" "PLDIR_GIT_USERNAME:GIT_USERNAME" "PLDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "PLDIR_GIT_BRANCH:GIT_BRANCH" "PLDIR_GIT_TAG:GIT_TAG" "PLDIR_GIT_COMMIT:GIT_COMMIT" "PLDIR_GIT_BARE:GIT_BARE")
+GIT_DIR=${WEBROOT}/user/plugins
+pull_repo
+
+# Pull /user/themes directory repo
+GIT_VARIABLES=("THDIR_GIT_REPO:GIT_REPO" "THDIR_GIT_USERNAME:GIT_USERNAME" "THDIR_GIT_PERSONAL_TOKEN:GIT_PERSONAL_TOKEN" "THDIR_GIT_BRANCH:GIT_BRANCH" "THDIR_GIT_TAG:GIT_TAG" "THDIR_GIT_COMMIT:GIT_COMMIT" "THDIR_GIT_BARE:GIT_BARE")
+GIT_DIR=${WEBROOT}/user/themes
+pull_repo
 
 # Enable custom nginx config files if they exist
-if [ -f /var/www/html/conf/nginx/nginx.conf ]; then
-  cp /var/www/html/conf/nginx/nginx.conf /etc/nginx/nginx.conf
+if [ -f ${WEBROOT}/conf/nginx/nginx.conf ]; then
+  cp ${WEBROOT}/conf/nginx/nginx.conf /etc/nginx/nginx.conf
 fi
 
-if [ -f /var/www/html/conf/nginx/nginx-site.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
+if [ -f ${WEBROOT}/conf/nginx/nginx-site.conf ]; then
+  cp ${WEBROOT}/conf/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
 fi
 
-if [ -f /var/www/html/conf/nginx/nginx-site-ssl.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+if [ -f ${WEBROOT}/conf/nginx/nginx-site-ssl.conf ]; then
+  cp ${WEBROOT}/conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
 fi
 
 if [ -n "$DOMAIN" ]; then 
@@ -169,20 +224,22 @@ else
  sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout 30s;/g" /etc/nginx/globals/grav.inc
 fi
 
+# Change numerical user id to match filesystem mount
 if [ ! -z "$PUID" ]; then
   if [ -z "$PGID" ]; then
     PGID=${PUID}
   fi
   usermod -u $PUID nginx
   groupmod -g $PGID nginx
+fi
 
-  if [ -z "$SKIP_CHOWN" ]; then
-    echo "Changing file ownership";
-    chown -R nginx.nginx $WEBROOT;
-    chown -R nginx.nginx /var/www/errors;
-    echo "Changing directory permissions";
-    find $WEBROOT -type d -exec chmod 755 {} \;
-  fi
+# reset file permissions
+if [ -z "$SKIP_CHOWN" ]; then
+  echo "Changing file ownership";
+  chown -R nginx.nginx $WEBROOT;
+  chown -R nginx.nginx /var/www/errors;
+  echo "Changing directory permissions";
+  find $WEBROOT -type d -exec chmod 755 {} \;
 fi
 
 # enable NAXSI firewall
@@ -231,58 +288,6 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
 
   # make sure NGINX is stopped
   /usr/sbin/nginx -s stop;
-fi
-
-if [[ "$PREP_VOLUMES" == "1" ]]; then 
-  # copy backed up user directory to mounted user volume
-  rsync -a /var/lib/grav/user/ $WEBROOT/user
-fi 
-
-# remove copy of grav user directory from container
-rm -rf /var/lib/grav 
-
-# replace user directory with bare git repo
-if [ -n "$USER_REPO" ]; then 
-  # remove user directory
-  rm -rf ${WEBROOT}/user 
-  # clone bare repo
-  git clone --recurse-submodules $USER_REPO ${WEBROOT}/user
-fi 
-
-# replace user/pages directory with bare git repo
-if [ -n "$PAGES_REPO" ]; then 
-  # remove user directory
-  rm -rf ${WEBROOT}/user/pages 
-  # clone bare repo
-  git clone --recurse-submodules $PAGES_REPO ${WEBROOT}/user/pages
-fi
-
-# replace user/config directory with bare git repo
-if [ -n "$CONFIG_REPO" ]; then 
-  # remove user directory
-  rm -rf ${WEBROOT}/user/config 
-  # clone bare repo
-  git clone --recurse-submodules $CONFIG_REPO ${WEBROOT}/user/config
-fi
-
-# replace user/plugins directory with bare git repo
-if [ -n "$PLUGINS_REPO" ]; then 
-  # remove user directory
-  rm -rf ${WEBROOT}/user/plugins 
-  if [[ "$GIT_PUSH_DAILY" == "1" ]]; then 
-    git clone --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
-  else 
-    # clone bare repo
-    git clone --recurse-submodules $PLUGINS_REPO ${WEBROOT}/user/plugins
-  fi 
-fi
-
-# replace user/themes directory with bare git repo
-if [ -n "$THEMES_REPO" ]; then 
-  # remove user directory
-  rm -rf ${WEBROOT}/user/themes 
-  # clone bare repo
-  git clone --recurse-submodules $THEMES_REPO ${WEBROOT}/user/themes
 fi
 
 # if there is plugins then install each
