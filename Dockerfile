@@ -87,6 +87,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
   --user=nginx \
   --group=nginx \
+  --with-debug \
   --with-http_ssl_module \
   --with-http_realip_module \
   --with-http_addition_module \
@@ -188,10 +189,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   | sort -u \
   )" \
   && apk add --no-cache --virtual .nginx-rundeps $runDeps \
-  && mv /tmp/envsubst /usr/local/bin/ \
-  # forward request and error logs to docker log collector
-  && ln -sf /dev/stdout /var/log/nginx/access.log \
-  && ln -sf /dev/stderr /var/log/nginx/error.log
+  && mv /tmp/envsubst /usr/local/bin/ 
 
 # Install system dependencies
 RUN apk add --no-cache --virtual .sys-deps \
@@ -219,7 +217,7 @@ RUN mkdir -p /etc/nginx/sites-available/ && \
   mkdir -p /etc/nginx/sites-enabled/ && \
   mkdir -p /etc/nginx/ssl/ && \
   rm -Rf /var/www/* && \
-  mkdir /var/www/html/
+  mkdir /var/www/html/ 
 COPY etc /etc
 
 # tweak php-fpm config
@@ -229,6 +227,9 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
   echo "variables_order = \"EGPCS\""  >> ${php_vars} && \
   echo "memory_limit = 128M"  >> ${php_vars} && \
   echo "max_execution_time = 30" >> ${php_vars} && \
+  echo "log_errors = On" >> ${php_vars} && \
+  echo "error_reporting = E_ALL" >> ${php_vars} && \
+  echo "error_log = /var/www/html/logs/php-errors.log" >> ${php_vars} && \
   sed -i \
   -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" \
   -e "s/pm.max_children = 5/pm.max_children = 4/g" \
@@ -284,6 +285,10 @@ ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
 ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
 ADD scripts/start.sh /start.sh
 RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
+
+# forward request and error logs to docker log collector
+#RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+#  && ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 443 80
 CMD ["/start.sh"]
