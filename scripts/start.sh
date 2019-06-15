@@ -25,9 +25,10 @@ fi
 
 # Set custom WEBROOT
 if [ ! -z "$WEBROOT" ]; then
- sed -i "s#root ${WEBROOT};#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf
+  echo "Changing root from /var/www/html to ${WEBROOT}";
+  sed -i "s#root ${WEBROOT};#root ${WEBROOT};#g" /etc/nginx/sites-*/*.conf;
 else
- WEBROOT=${WEBROOT}
+  WEBROOT=/var/www/html;
 fi
 
 # Setup git variables
