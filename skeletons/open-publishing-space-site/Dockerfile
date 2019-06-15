@@ -28,7 +28,7 @@ RUN rsync -a --del \
 WORKDIR ${WEBROOT}
 
 # Cleanup
-RUN rm -f \
+RUN rm -rf \
     .dependencies \
     .editorconfig \
     .htaccess \
@@ -38,4 +38,9 @@ RUN rm -f \
     CONTRIBUTING.md \
     LICENSE.txt \
     README.md \
-    codeception.yml
+    codeception.yml \
+    user/.dependencies \
+    user/.gitattributes \
+    user/.github/ \
+    user/CHANGELOG.md \
+    user/LICENSE 
