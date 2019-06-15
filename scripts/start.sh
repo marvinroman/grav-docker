@@ -58,7 +58,6 @@ pull_repo() {
       VAR0=${VARS[0]}
       VAR1=${VARS[1]}
       declare "${VAR1}"="${!VAR0}"
-      echo "${VAR1}: ${!VAR1}"
       IFS=' '
     done
   fi 
@@ -83,7 +82,7 @@ pull_repo() {
       git checkout ${GIT_BRANCH} || exit 1
       git submodule update --recursive || exit 1
     else 
-      rm -rf ${GIT_DIR}
+      rm -rf ${GIT_DIR}/* && rm -rf ${GIT_DIR}/.*
       git clone ${GIT_BARE} -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
     fi
 
