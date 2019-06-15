@@ -84,14 +84,12 @@ PHP_MEM_LIMIT | Set higher PHP memory limit, default is 128 Mb
 PHP_POST_MAX_SIZE | Set a larger post_max_size, default is 100 Mb
 PHP_UPLOAD_MAX_FILESIZE | Set a larger upload_max_filesize, default is 100 Mb
 PHP_ERRORS_STDERR | Send php logs to docker logs
-PHP_MAX_EXECUTION_TIME
+PHP_MAX_EXECUTION_TIME | Set php max_execution_time 
 DOMAIN | Set domain name for Lets Encrypt scripts
 REAL_IP_HEADER | set to 1 to enable real ip support in the logs
 REAL_IP_FROM | set to your CIDR block for real ip in logs
-PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
 PUID | Set to UserID you want to use for nginx (helps permissions when using local volume)
-REMOVE_FILES | Use REMOVE_FILES=0 to prevent the script from clearing out /var/www/html (useful for working with local files)
-APPLICATION_ENV | Set this to development to prevent composer deleting local development dependencies
+PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
 SKIP_CHOWN | Set to 1 to avoid running chown -Rf on /var/www/html
 SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
