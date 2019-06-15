@@ -8,12 +8,15 @@ ENV WEBROOT /var/www/html
 ENV SKELETON grav-skeleton-learn2-with-git-sync-site
 
 # Install skeleton
+USER nginx
 WORKDIR /var/www 
 RUN rm -rf ${WEBROOT}
 RUN curl -fSL "https://github.com/hibbitts-design/grav-skeleton-learn2-with-git-sync/releases/download/${VERSION}/${SKELETON}.zip" -o ${SKELETON}.zip 
 RUN unzip -q ${SKELETON}.zip
 RUN mv ${SKELETON} html 
 RUN rm -f ${SKELETON}.zip
+
+USER root
 RUN mkdir -p /var/lib/grav/user
 
 # Create copy of user directory to copy for mounted volumes
@@ -36,4 +39,3 @@ RUN rm -f \
     LICENSE.txt \
     README.md \
     codeception.yml
-RUN chown -R nginx.nginx ${WEBROOT}
