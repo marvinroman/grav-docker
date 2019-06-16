@@ -202,6 +202,22 @@ if [ -n "$THEME" ]; then
   su-exec nginx ${WEBROOT}/bin/gpm install -n $THEME;
 fi 
 
+# Set custom admin URI
+if [[ ! -x "$GRAV_ADMIN" ]]; then 
+  echo "Setting admin URI in nginx grav config"
+  sed -i "s#location /admin#location /${GRAV_ADMIN}#g" /etc/nginx/globals/grav.inc
+  if [[ ! -f "${WEBROOT}/user/config/plugins/admin.yaml" ]]; then 
+    if [[ ! -f "${WEBROOT}/user/plugins/admin/admin.yaml" ]]; then 
+      echo "Installing admin plugin"
+      su-exec nginx ${WEBROOT}/bin/gpm install -n admin 
+    fi 
+    echo "Copying admin.yaml to config/plugins directory"
+    cp ${WEBROOT}/user/plugins/admin/admin.yaml ${WEBROOT}/user/config/plugins/admin.yaml
+  fi 
+  echo "Changing admin URL in "
+  sed -ir "s#route:.*#route: '/${GRAV_ADMIN}'#" ${WEBROOT}/user/config/plugins/admin.yaml
+fi 
+
 # Run SMTP server to send mail
 if [[ "$EMAIL_SERVER" == "1" ]]; then 
 

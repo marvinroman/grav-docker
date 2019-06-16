@@ -48,3 +48,4 @@ TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email
 NAXSI | Set to 1 to enable NAXSI web firewall @TODO not yet implemented
 PAGESPEED | Set to 1 to enable Pagespeed module @TODO not yet implemented
+GRAV_ADMIN | Set to URI that you want to replace `/admin`  
