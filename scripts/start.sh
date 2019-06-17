@@ -242,7 +242,7 @@ fi
 # Set custom admin URI
 if [[ ! -x "$GRAV_ADMIN" ]]; then 
   echo "Setting admin URI in nginx grav config"
-  sed -i "s#location /admin#location /${GRAV_ADMIN}#g" /etc/nginx/globals/grav.inc
+  sed -i "s#request_uri ~ /admin#request_uri ~ /${GRAV_ADMIN}#g" /etc/nginx/globals/grav.inc
   if [[ ! -f "${WEBROOT}/user/config/plugins/admin.yaml" ]]; then 
     if [[ ! -f "${WEBROOT}/user/plugins/admin/admin.yaml" ]]; then 
       echo "Installing admin plugin"

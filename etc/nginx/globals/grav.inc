@@ -20,12 +20,6 @@ location / {
     try_files $uri $uri/ /index.php?$query_string;    
 }
 
-location /admin {
-    set $skip_cache 1;
-    absolute_redirect off;
-    try_files $uri $uri/ /index.php?$query_string;
-}
-
 # pass the PHP scripts to FastCGI server listening on socket
 location ~ \.php$ {
     try_files $uri =404;
@@ -38,6 +32,7 @@ location ~ \.php$ {
     fastcgi_index index.php;
     include fastcgi_params;
 
+    if ($request_uri ~ /admin) { set $skip_cache 1; }
     # include /etc/nginx/globals/fastcgi_cache.inc;
     # include /etc/nginx/globals/debug.inc;
 
