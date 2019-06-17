@@ -1,10 +1,11 @@
 ## Available Configuration Parameters
 The following flags are a list of all the currently supported options that can be changed by passing in the variables to docker with the -e flag.
 
-### Git
+### Git 
 
 Name | Description
 --------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GIT_PUSH | Set to 1 to automatically push to repo on changes in `/user` directory  
 GIT_USE_SSH | Set this to 1 if you want to use git over SSH (instead of HTTP), useful if you want to use Bitbucket instead of GitHub  
 GIT_EMAIL | Set your email for code pushing (required for git to work)  
 GIT_NAME | Set your name for code pushing (required for git to work)  
@@ -16,61 +17,6 @@ GIT_COMMIT | Specify a specific git commit (optional)
 SSH_KEY | Private SSH deploy key for your repository base64 encoded (requires write permissions for pushing)  
 GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access)  
 GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access)  
-
-### Git for directory /user
-Name | Description
---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-USRDIR_GIT_BARE | Select a specific branch (optional) for `/user` repo  
-USRDIR_GIT_BRANCH | Select a specific branch (optional) for `/user` repo  
-USRDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user` repo  
-USRDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user` repo  
-USRDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user` repo  
-USRDIR_GIT_REPO | URL to the repository containing your source code for the `/user` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
-USRDIR_GIT_TAG | Specify a specific git tag (optional) for `/user` repo  
-
-### Git for directory /user/pages
-Name | Description
---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-PGDIR_GIT_BARE | Select a specific branch (optional) for `/user/pages` repo  
-PGDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/pages` repo  
-PGDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/pages` repo  
-PGDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/pages` repo  
-PGDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/pages` repo  
-PGDIR_GIT_REPO | URL to the repository containing your source code for the `/user/pages` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
-PGDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/pages` repo  
-
-### Git for directory /user/config
-Name | Description
---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-CDIR_GIT_BARE | Select a specific branch (optional) for `/user/config` repo  
-CDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/config` repo  
-CDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/config` repo  
-CDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/config` repo  
-CDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/config` repo  
-CDIR_GIT_REPO | URL to the repository containing your source code for the `/user/config` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
-CDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/config` repo  
-
-### Git for directory /user/plugins
-Name | Description
---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-PLDIR_GIT_BARE | Select a specific branch (optional) for `/user/plugins` repo  
-PLDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/plugins` repo  
-PLDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/plugins` repo  
-PLDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/plugins` repo  
-PLDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/plugins` repo  
-PLDIR_GIT_REPO | URL to the repository containing your source code for the `/user/plugins` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
-PLDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/plugins` repo  
-
-### Git for directory /user/themes
-Name | Description
---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-THDIR_GIT_BARE | Select a specific branch (optional) for `/user/themes` repo  
-THDIR_GIT_BRANCH | Select a specific branch (optional) for `/user/themes` repo  
-THDIR_GIT_COMMIT | Specify a specific git commit (optional) for `/user/themes` repo  
-THDIR_GIT_PERSONAL_TOKEN | Personal access token for your git account (required for HTTPS git access) for `/user/themes` repo  
-THDIR_GIT_USERNAME | Git username for use with personal tokens. (required for HTTPS git access) for `/user/themes` repo  
-THDIR_GIT_REPO | URL to the repository containing your source code for the `/user/themes` directory. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
-THDIR_GIT_TAG | Specify a specific git tag (optional) for `/user/themes` repo  
 
 ### Others
 
@@ -102,3 +48,5 @@ TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email
 NAXSI | Set to 1 to enable NAXSI web firewall @TODO not yet implemented
 PAGESPEED | Set to 1 to enable Pagespeed module @TODO not yet implemented
+GRAV_ADMIN | Set to URI that you want to replace `/admin`  
+KEEP_NGINX_SRC | Set if you want to keep NGINX source code for testing new compiling
