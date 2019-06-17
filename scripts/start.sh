@@ -154,18 +154,6 @@ fi
 # enable fastcgi cache
 if [[ "$FASTCGI_CACHE" == "1" ]]; then
   sed -i "s/# include \/etc\/nginx\/globals\/fastcgi_cache.inc/include \/etc\/nginx\/globals\/fastcgi_cache.inc/g" /etc/nginx/globals/grav.inc
-    # Install inotify-tools
-  apk add --no-cache inotify-tools
-
-  # add inotifywait command to supervisord config
-  cat <<EOF >> /etc/supervisord.conf
-[program:cache-flush]
-command=bash -c 'while inotifywait -q -r -e create,delete,modify,move,attrib ${WEBROOT}/user/config ${WEBROOT}/user/pages; do rm -rf /etc/nginx/cache/*; done'
-stdout_logfile	= /dev/stdout
-stderr_logfile	= /dev/stderr
-autorestart     = true
-EOF
-  
 fi
 
 # enable NGINX debug headers
@@ -251,7 +239,15 @@ EOF
 fi 
 
 # Run SMTP server to send mail
-if [[ "$GIT_PUSH" == "1" ]]; then 
+if [[ "$GIT_PUSH" == "1" ]] || [[ "$FASTCGI_CACHE" == "1" ]]; then 
+
+  commands=""
+  if [[ "$GIT_PUSH" == "1" ]]; then 
+    commands="/usr/bin/push;"
+  fi
+  if [[ "$FASTCGI_CACHE" == "1" ]]; then 
+    commands="${commands} rm -rf /etc/nginx/cache/*;"
+  fi
 
   # Install inotify-tools
   apk add --no-cache inotify-tools
@@ -259,7 +255,7 @@ if [[ "$GIT_PUSH" == "1" ]]; then
   # add inotifywait command to supervisord config
   cat <<EOF >> /etc/supervisord.conf
 [program:git-push]
-command=bash -c 'while inotifywait -q -r -e create,delete,modify,move,attrib --exclude "/data/*" ${WEBROOT}/user/; do /usr/bin/push; done'
+command=bash -c 'while inotifywait -q -r -e create,delete,modify,move,attrib --exclude "/data/*" ${WEBROOT}/user/; do ${commands} done'
 stdout_logfile	= /dev/stdout
 stderr_logfile	= /dev/stderr
 autorestart     = true
