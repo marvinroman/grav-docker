@@ -186,6 +186,7 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
     else
       /usr/bin/letsencrypt-setup
     fi
+    cp /usr/bin/letsencrypt-renew /etc/periodic/monthly/letsencrypt-renew
   fi
 
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
