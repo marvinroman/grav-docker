@@ -89,6 +89,7 @@ fi
 
 # Set the desired timezone
 if [ -n "$TIMEZONE" ]; then 
+  echo "Changing PHP timezone to "
   echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
 else 
   echo date.timezone=UCT > /usr/local/etc/php/conf.d/timezone.ini
@@ -96,31 +97,38 @@ fi
 
 # Display errors in docker logs
 if [ ! -z "$PHP_ERRORS_STDERR" ]; then
+  echo "Altering PHP logging to be redirected to docker logs"
   echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-vars.ini
   echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
 # Increase the memory_limit
 if [ ! -z "$PHP_MEM_LIMIT" ]; then
- sed -i "s/memory_limit = 128M/memory_limit = ${PHP_MEM_LIMIT}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
+  echo "Altering PHP memory_limit to ${PHP_MEM_LIMIT}"
+  sed -i "s/memory_limit = 128M/memory_limit = ${PHP_MEM_LIMIT}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
 # Increase the post_max_size
 if [ ! -z "$PHP_POST_MAX_SIZE" ]; then
- sed -i "s/post_max_size = 100M/post_max_size = ${PHP_POST_MAX_SIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
+  echo "Altering PHP post_max_size to ${PHP_POST_MAX_SIZE}"
+  sed -i "s/post_max_size = 100M/post_max_size = ${PHP_POST_MAX_SIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
 # Increase the upload_max_filesize
 if [ ! -z "$PHP_UPLOAD_MAX_FILESIZE" ]; then
- sed -i "s/upload_max_filesize = 100M/upload_max_filesize= ${PHP_UPLOAD_MAX_FILESIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
+  echo "Altering PHP upload_max_filesize to ${PHP_UPLOAD_MAX_FILESIZE}"
+  sed -i "s/upload_max_filesize = 100M/upload_max_filesize= ${PHP_UPLOAD_MAX_FILESIZE}M/g" /usr/local/etc/php/conf.d/docker-vars.ini
 fi
 
 # Increase the max_execution_time
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
- sed -i "s/max_execution_time = 30/max_execution_time = ${PHP_MAX_EXECUTION_TIME}/g" /usr/local/etc/php/conf.d/docker-vars.ini
- sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout ${PHP_MAX_EXECUTION_TIME}s;/g" /etc/nginx/globals/grav.inc
+  echo "Altering PHP max_execution_time to ${PHP_MAX_EXECUTION_TIME}"
+  sed -i "s/max_execution_time = 30/max_execution_time = ${PHP_MAX_EXECUTION_TIME}/g" /usr/local/etc/php/conf.d/docker-vars.ini
+  echo "Altering NGINX fastcgi_read_timeout to ${PHP_MAX_EXECUTION_TIME}"
+  sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout ${PHP_MAX_EXECUTION_TIME}s;/g" /etc/nginx/globals/grav.inc
 else
- sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout 30s;/g" /etc/nginx/globals/grav.inc
+  echo "Altering NGINX fastcgi_read_timeout to 30"
+  sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout 30s;/g" /etc/nginx/globals/grav.inc
 fi
 
 # Change numerical user id to match filesystem mount
@@ -128,7 +136,9 @@ if [ ! -z "$PUID" ]; then
   if [ -z "$PGID" ]; then
     PGID=${PUID}
   fi
+  echo "Altering nginx uid to ${PUID}"
   usermod -u $PUID nginx
+  echo "Altering nginx gid to ${PGID}"
   groupmod -g $PGID nginx
 fi
 
@@ -143,21 +153,25 @@ fi
 
 # enable NAXSI firewall
 if [[ "$NAXSI" == "1" ]]; then
+  echo "Activating NAXSI"
   sed -i "s/# include \/etc\/nginx\/globals\/naxsi-site.rules/include \/etc\/nginx\/globals\/naxsi-site.rules/g" /etc/nginx/globals/grav.inc
 fi
 
 # enable PageSpeed module
 if [[ "$PAGESPEED" == "1" ]]; then
+  echo "Activating PageSpeed"
   sed -i "s/# include \/etc\/nginx\/globals\/pagespeed.rules/include \/etc\/nginx\/globals\/pagespeed.rules/g" /etc/nginx/globals/grav.inc
 fi
 
 # enable fastcgi cache
 if [[ "$FASTCGI_CACHE" == "1" ]]; then
+  echo "Activating FastCGI caching"
   sed -i "s/# include \/etc\/nginx\/globals\/fastcgi_cache.inc/include \/etc\/nginx\/globals\/fastcgi_cache.inc/g" /etc/nginx/globals/grav.inc
 fi
 
 # enable NGINX debug headers
 if [[ "$NGINX_DEBUG_HEADERS" == "1" ]]; then
+  echo "Activating nginx debug headers"
   sed -i "s/# include \/etc\/nginx\/globals\/debug.inc/include \/etc\/nginx\/globals\/debug.inc/g" /etc/nginx/globals/grav.inc
 fi
 
@@ -170,23 +184,30 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
 
   if [[ "$SSL_LETS_ENCRYPT" == "1" ]]; then
     if [[ -d "/etc/letsencrypt/live/${DOMAIN}" ]]; then
+      echo "Running letsencrypt-renew"
       /usr/bin/letsencrypt-renew
     else
+      echo "Running letsencrypt-setup"
       /usr/bin/letsencrypt-setup
     fi
+    echo "Copying letsencrypt-renew script into monthly cron"
     cp /usr/bin/letsencrypt-renew /etc/periodic/monthly/letsencrypt-renew
   fi
 
+  echo "Adding domain to default SSL config"
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
 
   # redirect http to https
   if [[ "$REDIRECT_SSL" == "1" ]]; then
-      rm -f /etc/nginx/sites-enabled/default.conf;
-      sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
-      ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
+    echo "Removing default.conf"
+    rm -f /etc/nginx/sites-enabled/default.conf;
+    echo "Adding domain to default-redirect.conf"
+    sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
+    echo "Linking default-redirect.conf into sites-enabled directory"
+    ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
   fi
 
-  # make sure NGINX is stopped
+  echo "make sure NGINX is stopped"
   /usr/sbin/nginx -s stop;
 fi
 
@@ -195,6 +216,7 @@ if [ ${#PLUGINS[@]} -gt 0 ]; then
   PLUGINS="${PLUGINS},error,markdown-notices,problems"
   IFS=',';
   for plugin in $PLUGINS; do 
+    echo "Installing plugin ${plugin}"
     su-exec nginx ${WEBROOT}/bin/gpm install -n $plugin;
   done 
   IFS=' ';
@@ -202,6 +224,7 @@ fi
 
 # if theme specified then install 
 if [ -n "$THEME" ]; then 
+  echo "Installing theme ${THEME}"
   su-exec nginx ${WEBROOT}/bin/gpm install -n $THEME;
 fi 
 
@@ -224,10 +247,10 @@ fi
 # Run SMTP server to send mail
 if [[ "$EMAIL_SERVER" == "1" ]]; then 
 
-  # Install Postfix
+  echo "Installing Postfix"
   apk add --no-cache postfix 
 
-  # add Postfix to supervisord config
+  echo "Adding Postfix to supervisord config"
   cat <<EOF >> /etc/supervisord.conf
 [program:postfix]
 process_name  = master
@@ -246,14 +269,15 @@ if [[ "$GIT_PUSH" == "1" ]] || [[ "$FASTCGI_CACHE" == "1" ]]; then
     commands="/usr/bin/push;"
   fi
   if [[ "$FASTCGI_CACHE" == "1" ]]; then 
-    commands="${commands} rm -rf /etc/nginx/cache/*;"
+    commands="${commands} /usr/bin/flush_nginx_cache;"
   fi
 
-  # Install inotify-tools
+  echo "Installing inotify-tools"
   apk add --no-cache inotify-tools
 
-  # add inotifywait command to supervisord config
+  echo "Adding inotifywait command to supervisord config"
   cat <<EOF >> /etc/supervisord.conf
+
 [program:git-push]
 command=bash -c 'while inotifywait -q -r -e create,delete,modify,move,attrib --exclude "/data/*" ${WEBROOT}/user/; do ${commands} done'
 stdout_logfile	= /dev/stdout
@@ -264,6 +288,7 @@ fi
 
 # Unless KEEP_NGINX_SRC set remove the NGINX source code
 if [ -z "$KEEP_NGINX_SRC" ]; then 
+  echo "Removing NGINX source code"
   rm -rf /usr/src/nginx-$NGINX_VERSION
 fi 
 

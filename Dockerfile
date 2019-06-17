@@ -287,11 +287,17 @@ RUN find /etc/periodic -type f -exec chmod +x {} +
 RUN mkdir -p /usr/lib/git
 ADD scripts/pull /usr/bin/pull
 ADD scripts/push /usr/bin/push
+ADD scripts/flush_nginx_cache /usr/bin/flush_nginx_cache
 ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
 ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
 ADD scripts/git-setup.lib /usr/lib/git/git-setup.lib
 ADD scripts/start.sh /start.sh
-RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
+RUN chmod 755 /usr/bin/pull && \
+  chmod 755 /usr/bin/push && \
+  chmod 755 /usr/bin/letsencrypt-setup && \
+  chmod 755 /usr/bin/letsencrypt-renew && \
+  chmod 755 /start.sh && \
+  chmod 755 /usr/bin/flush_nginx_cache
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
