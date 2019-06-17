@@ -17,7 +17,7 @@ location ~ ^/(sad-tear\.svg|ban\.svg|band-aid\.svg|50x\.html|40x\.html|404\.html
 location / {
     # include /etc/nginx/globals/naxsi-site.rules;
     absolute_redirect off;
-    try_files $uri $uri/ /index.php?$query_string;
+    try_files $uri $uri/ /index.php?$query_string;    
 }
 
 location /admin {
