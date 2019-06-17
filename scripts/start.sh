@@ -251,5 +251,10 @@ autorestart     = true
 EOF
 fi 
 
+# Unless KEEP_NGINX_SRC set remove the NGINX source code
+if [ -z "$KEEP_NGINX_SRC" ]; then 
+  rm -rf /usr/src/nginx-$NGINX_VERSION
+fi 
+
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
