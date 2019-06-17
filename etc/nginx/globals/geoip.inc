@@ -1,5 +1,3 @@
-load_module modules/ngx_http_geoip2_module.so;
-
 geoip2 /etc/maxmind-country.mmdb {
     auto_reload 5h;
     $geoip2_metadata_country_build metadata build_epoch;
