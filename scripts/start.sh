@@ -12,14 +12,14 @@ source /usr/lib/git/git-setup.lib
 
 # Prepare user volume if mounted
 if [[ "$PREP_USER_VOLUME" == "1" ]]; then 
-  # copy backed up user directory to mounted user volume
+  echo "Copying backed up user directory to mounted user volume"
   rsync -a /var/lib/grav/user/ $WEBROOT/user
 fi 
 
-# remove copy of grav user directory from container
+echo "Removing copy of grav user directory from container"
 rm -rf /var/lib/grav 
 
-# Run git pull script
+echo "Running git pull script"
 /usr/bin/pull
 
 # Enable custom nginx config files if they exist
@@ -36,50 +36,57 @@ if [ -f ${WEBROOT}/conf/nginx/nginx-site-ssl.conf ]; then
 fi
 
 if [ -n "$DOMAIN" ]; then 
+  echo "Adding domain ${DOMAIN} to NGINX configs"
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-*/default*.conf;
 fi 
 
-# Prevent config files from being filled to infinity by force of stop and restart the container
-lastlinephpconf="$(grep "." /usr/local/etc/php-fpm.conf | tail -1)"
-if [[ $lastlinephpconf == *"php_flag[display_errors]"* ]]; then
- sed -i '$ d' /usr/local/etc/php-fpm.conf
-fi
+echo "Prevent PHP config files from being filled to infinity by force of stop and restart the container"
+sed -i '/display_errors/d' /usr/local/etc/php-fpm.conf
+sed -i '/display_errors/d' /usr/local/etc/php-fpm.d/www.conf
 
 # Display PHP error's or not
 if [[ "$ERRORS" != "1" ]] ; then
- echo php_flag[display_errors] = off >> /usr/local/etc/php-fpm.d/www.conf
+  echo "Turning off PHP display_errors"
+  echo php_flag[display_errors] = off >> /usr/local/etc/php-fpm.d/www.conf
 else
- echo php_flag[display_errors] = on >> /usr/local/etc/php-fpm.d/www.conf
+  echo "Turning on PHP display_errors"
+  echo php_flag[display_errors] = on >> /usr/local/etc/php-fpm.d/www.conf
 fi
 
 # Display Version Details or not
 if [[ "$HIDE_NGINX_HEADERS" == "0" ]] ; then
- sed -i "s/server_tokens off;/server_tokens on;/g" /etc/nginx/nginx.conf
+  echo "Turning NGINX server_tokens on"
+  sed -i "s/server_tokens off;/server_tokens on;/g" /etc/nginx/nginx.conf
 else
- sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php-fpm.conf
+  echo "Turning NGINX expose_php off"
+  sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php-fpm.conf
 fi
 
 # Pass real-ip to logs when behind ELB, etc
 if [[ "$REAL_IP_HEADER" == "1" ]] ; then
- sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/sites-available/default.conf
- sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/sites-available/default.conf
- if [ ! -z "$REAL_IP_FROM" ]; then
-  sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/sites-available/default.conf
- fi
+  echo "Activating NGINX real_ip_header"
+  sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/sites-available/default.conf
+  sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/sites-available/default.conf
+  if [ ! -z "$REAL_IP_FROM" ]; then
+    echo "Chaning NGINX set_real_ip_from to ${REAL_IP_FROM}"
+    sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/sites-available/default.conf
+  fi
 fi
 # Do the same for SSL sites
 if [ -f /etc/nginx/sites-available/default-ssl.conf ]; then
- if [[ "$REAL_IP_HEADER" == "1" ]] ; then
-  sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/sites-available/default-ssl.conf
-  sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/sites-available/default-ssl.conf
-  if [ ! -z "$REAL_IP_FROM" ]; then
-   sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/sites-available/default-ssl.conf
+  if [[ "$REAL_IP_HEADER" == "1" ]] ; then
+    sed -i "s/#real_ip_header X-Forwarded-For;/real_ip_header X-Forwarded-For;/" /etc/nginx/sites-available/default-ssl.conf
+    sed -i "s/#set_real_ip_from/set_real_ip_from/" /etc/nginx/sites-available/default-ssl.conf
+    if [ ! -z "$REAL_IP_FROM" ]; then
+      sed -i "s#172.16.0.0/12#$REAL_IP_FROM#" /etc/nginx/sites-available/default-ssl.conf
+    fi
   fi
- fi
 fi
 
 if [[ "$USE_GEOIP" == "1" ]]; then 
+  echo "Downloading GeoIP databases"
   /etc/periodic/monthly/geoip 
+  echo "Activating GeoIP NGINX configurations"
   sed -i "s/# load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/" /etc/nginx/nginx.conf
   sed -i "s/# include \/etc\/nginx\/globals\/geoip.inc;/include \/etc\/nginx\/globals\/geoip.inc;/" /etc/nginx/nginx.conf
   sed -i "s/#fastcgi_param COUNTRY_CODE/fastcgi_param COUNTRY_CODE/" /etc/nginx/fastcgi_params
@@ -88,12 +95,16 @@ if [[ "$USE_GEOIP" == "1" ]]; then
 fi 
 
 # Set the desired timezone
-if [ -n "$TIMEZONE" ]; then 
-  echo "Changing PHP timezone to "
-  echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
-else 
-  echo date.timezone=UCT > /usr/local/etc/php/conf.d/timezone.ini
+apk add --no-cache tzdata
+if [ -z "$TIMEZONE" ]; then 
+  TIMEZONE=UTC
 fi 
+echo "Changing PHP timezone to ${TIMEZONE}"
+echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
+echo "Changins server timezone to ${TIMEZONE}"
+cp /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+echo $TIMEZONE > /etc/timezone 
+apk del tzdata
 
 # Display errors in docker logs
 if [ ! -z "$PHP_ERRORS_STDERR" ]; then
