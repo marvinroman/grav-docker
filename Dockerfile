@@ -11,6 +11,8 @@ ENV NGINX_VERSION 1.16.0
 ENV FRICKLE_MODULE_VERSION=2.3
 ENV LUA_MODULE_VERSION 0.10.14
 ENV DEVEL_KIT_MODULE_VERSION 0.3.0
+ENV LIBMAXMINDDB_VERSION 1.3.2
+ENV GEOIP2_MODULE_VERSION 3.2
 ENV LUAJIT_LIB=/usr/lib
 ENV LUAJIT_INC=/usr/include/luajit-2.1
 
@@ -106,34 +108,43 @@ ENV NGINX_CONFIG "--prefix=/etc/nginx \
   --with-http_auth_request_module \
   --with-http_xslt_module=dynamic \
   --with-http_image_filter_module=dynamic \
-  --with-http_geoip_module=dynamic \
   --with-http_perl_module=dynamic \
   --with-threads \
   --with-stream \
   --with-stream_ssl_module \
   --with-stream_ssl_preread_module \
   --with-stream_realip_module \
-  --with-stream_geoip_module=dynamic \
   --with-http_slice_module \
   --with-mail \
   --with-mail_ssl_module \
   --with-compat \
   --with-file-aio \
   --with-http_v2_module \
-  --add-module=/usr/src/ngx_devel_kit-$DEVEL_KIT_MODULE_VERSION \
-  --add-module=/usr/src/lua-nginx-module-$LUA_MODULE_VERSION \
-  --add-module=/usr/src/ngx_cache_purge-$FRICKLE_MODULE_VERSION"
+  --add-dynamic-module=/usr/src/ngx_devel_kit-$DEVEL_KIT_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/lua-nginx-module-$LUA_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/ngx_http_geoip2_module-$GEOIP2_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/ngx_cache_purge-$FRICKLE_MODULE_VERSION"
 
 RUN addgroup -S nginx \
   && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx
 
 RUN apk add --no-cache --virtual .build-deps $BUILD_DEPS
 
+WORKDIR /tmp 
+RUN curl -fSL https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VERSION}/libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz -o libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz \
+  && tar -zxf libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz \
+  && cd libmaxminddb-${LIBMAXMINDDB_VERSION} \
+  && ./configure \
+  && make \
+  && make install
+
+WORKDIR /tmp 
 RUN curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
   && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
   && curl -fSL https://github.com/simpl/ngx_devel_kit/archive/v$DEVEL_KIT_MODULE_VERSION.tar.gz -o ndk.tar.gz \
   && curl -fSL https://github.com/openresty/lua-nginx-module/archive/v$LUA_MODULE_VERSION.tar.gz -o lua.tar.gz \
-  && curl -fSL https://github.com/FRiCKLE/ngx_cache_purge/archive/${FRICKLE_MODULE_VERSION}.tar.gz -o ngx_cache_purge.tar.gz
+  && curl -fSL https://github.com/FRiCKLE/ngx_cache_purge/archive/${FRICKLE_MODULE_VERSION}.tar.gz -o ngx_cache_purge.tar.gz \
+  && curl -fSL https://github.com/leev/ngx_http_geoip2_module/archive/${GEOIP2_MODULE_VERSION}.tar.gz -o ngx_http_geoip2_module.tar.gz
 
 RUN export GNUPGHOME="$(mktemp -d)" \
   && found=''; \
@@ -154,7 +165,8 @@ RUN mkdir -p /usr/src \
   && tar -zxC /usr/src -f ndk.tar.gz \
   && tar -zxC /usr/src -f lua.tar.gz \
   && tar -zxC /usr/src -f ngx_cache_purge.tar.gz \
-  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz ngx_cache_purge.tar.gz
+  && tar -zxC /usr/src -f ngx_http_geoip2_module.tar.gz \
+  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz ngx_cache_purge.tar.gz ngx_http_geoip2_module.tar.gz
 
 WORKDIR /usr/src/nginx-$NGINX_VERSION
 

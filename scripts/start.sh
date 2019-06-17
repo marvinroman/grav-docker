@@ -79,7 +79,8 @@ if [ -f /etc/nginx/sites-available/default-ssl.conf ]; then
 fi
 
 if [[ "$USE_GEOIP" == "1" ]]; then 
-  sed -i "s/# load_module \/etc\/nginx\/modules\/ngx_http_geoip_module.so;/load_module \/etc\nginx\/modules\/ngx_http_geoip_module.so;/" /etc/nginx/nginx.conf
+  /etc/periodic/monthly/geoip 
+  sed -i "s/# load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/" /etc/nginx/nginx.conf
   sed -i "s/# include \/etc\/nginx\/globals\/geoip.inc;/include \/etc\/nginx\/globals\/geoip.inc;/" /etc/nginx/nginx.conf
   sed -i "s/#fastcgi_param COUNTRY_CODE/fastcgi_param COUNTRY_CODE/" /etc/nginx/fastcgi_params
   sed -i "s/#fastcgi_param COUNTRY_NAME/fastcgi_param COUNTRY_NAME/" /etc/nginx/fastcgi_params
