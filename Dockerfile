@@ -8,6 +8,7 @@ ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 
 ENV NGINX_VERSION 1.16.0
+ENV FRICKLE_MODULE_VERSION=2.3
 ENV LUA_MODULE_VERSION 0.10.14
 ENV DEVEL_KIT_MODULE_VERSION 0.3.0
 ENV LUAJIT_LIB=/usr/lib
@@ -73,10 +74,8 @@ RUN docker-php-ext-configure gd \
 
 # @TODO: compile NGINX w/NAXSI
 # @TODO: compile NGINX w/pagespeed
-
-RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
-  && CONFIG="\
-  --prefix=/etc/nginx \
+ENV GPG_KEYS B0F4253373F8F6F510D42178520A9993A1C052F8
+ENV NGINX_CONFIG "--prefix=/etc/nginx \
   --sbin-path=/usr/sbin/nginx \
   --modules-path=/usr/lib/nginx/modules \
   --conf-path=/etc/nginx/nginx.conf \
@@ -123,15 +122,20 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   --with-http_v2_module \
   --add-module=/usr/src/ngx_devel_kit-$DEVEL_KIT_MODULE_VERSION \
   --add-module=/usr/src/lua-nginx-module-$LUA_MODULE_VERSION \
-  " \
-  && addgroup -S nginx \
-  && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
-  && apk add --no-cache --virtual .build-deps $BUILD_DEPS \
-  && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+  --add-module=/usr/src/ngx_cache_purge-$FRICKLE_MODULE_VERSION"
+
+RUN addgroup -S nginx \
+  && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx
+
+RUN apk add --no-cache --virtual .build-deps $BUILD_DEPS
+
+RUN curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
   && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
   && curl -fSL https://github.com/simpl/ngx_devel_kit/archive/v$DEVEL_KIT_MODULE_VERSION.tar.gz -o ndk.tar.gz \
   && curl -fSL https://github.com/openresty/lua-nginx-module/archive/v$LUA_MODULE_VERSION.tar.gz -o lua.tar.gz \
-  && export GNUPGHOME="$(mktemp -d)" \
+  && curl -fSL https://github.com/FRiCKLE/ngx_cache_purge/archive/${FRICKLE_MODULE_VERSION}.tar.gz -o ngx_cache_purge.tar.gz
+
+RUN export GNUPGHOME="$(mktemp -d)" \
   && found=''; \
   for server in \
   ha.pool.sks-keyservers.net \
@@ -143,40 +147,25 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
   done; \
   test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
-  gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz \
-  #&& rm -r "$GNUPGHOME" nginx.tar.gz.asc \
-  && mkdir -p /usr/src \
+  gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz
+
+RUN mkdir -p /usr/src \
   && tar -zxC /usr/src -f nginx.tar.gz \
   && tar -zxC /usr/src -f ndk.tar.gz \
   && tar -zxC /usr/src -f lua.tar.gz \
-  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz \
-  && cd /usr/src/nginx-$NGINX_VERSION \
-  && ./configure $CONFIG --with-debug \
-  && make -j$(getconf _NPROCESSORS_ONLN) \
-  && mv objs/nginx objs/nginx-debug \
-  && mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so \
-  && mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so \
-  && mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so \
-  && mv objs/ngx_http_perl_module.so objs/ngx_http_perl_module-debug.so \
-  && mv objs/ngx_stream_geoip_module.so objs/ngx_stream_geoip_module-debug.so \
-  && ./configure $CONFIG \
+  && tar -zxC /usr/src -f ngx_cache_purge.tar.gz \
+  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz ngx_cache_purge.tar.gz
+
+WORKDIR /usr/src/nginx-$NGINX_VERSION
+
+RUN ./configure $NGINX_CONFIG \
   && make -j$(getconf _NPROCESSORS_ONLN) \
   && make install \
   && rm -rf /etc/nginx/html/ \
   && mkdir /etc/nginx/conf.d/ \
-  && mkdir -p /usr/share/nginx/html/ \
-  && install -m644 html/index.html /usr/share/nginx/html/ \
-  && install -m644 html/50x.html /usr/share/nginx/html/ \
-  && install -m755 objs/nginx-debug /usr/sbin/nginx-debug \
-  && install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so \
-  && install -m755 objs/ngx_http_image_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_image_filter_module-debug.so \
-  && install -m755 objs/ngx_http_geoip_module-debug.so /usr/lib/nginx/modules/ngx_http_geoip_module-debug.so \
-  && install -m755 objs/ngx_http_perl_module-debug.so /usr/lib/nginx/modules/ngx_http_perl_module-debug.so \
-  && install -m755 objs/ngx_stream_geoip_module-debug.so /usr/lib/nginx/modules/ngx_stream_geoip_module-debug.so \
   && ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
   && strip /usr/sbin/nginx* \
   && strip /usr/lib/nginx/modules/*.so \
-  && rm -rf /usr/src/nginx-$NGINX_VERSION \
   \
   # Bring in gettext so we can get `envsubst`, then throw
   # the rest away. To do this, we need to install `gettext`
