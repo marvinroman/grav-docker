@@ -26,6 +26,9 @@ build_latest:
     - docker push $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2
   only:
     - master
+  except: 
+    changes:
+      - "*.md"
 
 build_tags:
   stage: build_tags
