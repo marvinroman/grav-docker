@@ -17,7 +17,7 @@ location ~ ^/(sad-tear\.svg|ban\.svg|band-aid\.svg|50x\.html|40x\.html|404\.html
 location / {
     # include /etc/nginx/globals/naxsi-site.rules;
     absolute_redirect off;
-    try_files $uri $uri/ /index.php?$query_string;
+    try_files $uri $uri/ /index.php?$query_string;    
 }
 
 # pass the PHP scripts to FastCGI server listening on socket
@@ -32,6 +32,7 @@ location ~ \.php$ {
     fastcgi_index index.php;
     include fastcgi_params;
 
+    if ($request_uri ~ /admin) { set $skip_cache 1; }
     # include /etc/nginx/globals/fastcgi_cache.inc;
     # include /etc/nginx/globals/debug.inc;
 

@@ -1,4 +1,4 @@
-FROM php:7.3.5-fpm-alpine3.9
+FROM php:7.3.6-fpm-alpine3.9
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
 LABEL version="v0.0.3"
@@ -8,8 +8,11 @@ ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 
 ENV NGINX_VERSION 1.16.0
+ENV FRICKLE_MODULE_VERSION=2.3
 ENV LUA_MODULE_VERSION 0.10.14
 ENV DEVEL_KIT_MODULE_VERSION 0.3.0
+ENV LIBMAXMINDDB_VERSION 1.3.2
+ENV GEOIP2_MODULE_VERSION 3.2
 ENV LUAJIT_LIB=/usr/lib
 ENV LUAJIT_INC=/usr/include/luajit-2.1
 
@@ -33,6 +36,10 @@ ENV BUILD_DEPS "autoconf \
   perl-dev \
   python-dev \
   zlib-dev"
+
+# Iconv fix see (https://github.com/docker-library/php/issues/240)
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ gnu-libiconv
+ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Install PHP required extensions
 ENV PHP_REQS "curl ctype dom json mbstring openssl session xml"
@@ -64,15 +71,13 @@ RUN docker-php-ext-configure gd \
   --with-png-dir=/usr/include/ \
   --with-webp-dir=/usr/include/ \
   --with-xpm-dir=/usr/include/ && \
-  docker-php-ext-install -j$(nproc) exif gd simplexml zip && \
+  docker-php-ext-install -j$(nproc) exif gd iconv simplexml zip && \
   docker-php-source delete
 
 # @TODO: compile NGINX w/NAXSI
 # @TODO: compile NGINX w/pagespeed
-
-RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
-  && CONFIG="\
-  --prefix=/etc/nginx \
+ENV GPG_KEYS B0F4253373F8F6F510D42178520A9993A1C052F8
+ENV NGINX_CONFIG "--prefix=/etc/nginx \
   --sbin-path=/usr/sbin/nginx \
   --modules-path=/usr/lib/nginx/modules \
   --conf-path=/etc/nginx/nginx.conf \
@@ -103,31 +108,45 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   --with-http_auth_request_module \
   --with-http_xslt_module=dynamic \
   --with-http_image_filter_module=dynamic \
-  --with-http_geoip_module=dynamic \
   --with-http_perl_module=dynamic \
   --with-threads \
   --with-stream \
   --with-stream_ssl_module \
   --with-stream_ssl_preread_module \
   --with-stream_realip_module \
-  --with-stream_geoip_module=dynamic \
   --with-http_slice_module \
   --with-mail \
   --with-mail_ssl_module \
   --with-compat \
   --with-file-aio \
   --with-http_v2_module \
-  --add-module=/usr/src/ngx_devel_kit-$DEVEL_KIT_MODULE_VERSION \
-  --add-module=/usr/src/lua-nginx-module-$LUA_MODULE_VERSION \
-  " \
-  && addgroup -S nginx \
-  && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
-  && apk add --no-cache --virtual .build-deps $BUILD_DEPS \
-  && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+  --add-dynamic-module=/usr/src/ngx_devel_kit-$DEVEL_KIT_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/lua-nginx-module-$LUA_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/ngx_http_geoip2_module-$GEOIP2_MODULE_VERSION \
+  --add-dynamic-module=/usr/src/ngx_cache_purge-$FRICKLE_MODULE_VERSION"
+
+RUN addgroup -S nginx \
+  && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx
+
+RUN apk add --no-cache --virtual .build-deps $BUILD_DEPS
+
+WORKDIR /tmp 
+RUN curl -fSL https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VERSION}/libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz -o libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz \
+  && tar -zxf libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz \
+  && cd libmaxminddb-${LIBMAXMINDDB_VERSION} \
+  && ./configure \
+  && make \
+  && make install
+
+WORKDIR /tmp 
+RUN curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
   && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
   && curl -fSL https://github.com/simpl/ngx_devel_kit/archive/v$DEVEL_KIT_MODULE_VERSION.tar.gz -o ndk.tar.gz \
   && curl -fSL https://github.com/openresty/lua-nginx-module/archive/v$LUA_MODULE_VERSION.tar.gz -o lua.tar.gz \
-  && export GNUPGHOME="$(mktemp -d)" \
+  && curl -fSL https://github.com/FRiCKLE/ngx_cache_purge/archive/${FRICKLE_MODULE_VERSION}.tar.gz -o ngx_cache_purge.tar.gz \
+  && curl -fSL https://github.com/leev/ngx_http_geoip2_module/archive/${GEOIP2_MODULE_VERSION}.tar.gz -o ngx_http_geoip2_module.tar.gz
+
+RUN export GNUPGHOME="$(mktemp -d)" \
   && found=''; \
   for server in \
   ha.pool.sks-keyservers.net \
@@ -139,40 +158,26 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
   done; \
   test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
-  gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz \
-  #&& rm -r "$GNUPGHOME" nginx.tar.gz.asc \
-  && mkdir -p /usr/src \
+  gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz
+
+RUN mkdir -p /usr/src \
   && tar -zxC /usr/src -f nginx.tar.gz \
   && tar -zxC /usr/src -f ndk.tar.gz \
   && tar -zxC /usr/src -f lua.tar.gz \
-  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz \
-  && cd /usr/src/nginx-$NGINX_VERSION \
-  && ./configure $CONFIG --with-debug \
-  && make -j$(getconf _NPROCESSORS_ONLN) \
-  && mv objs/nginx objs/nginx-debug \
-  && mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so \
-  && mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so \
-  && mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so \
-  && mv objs/ngx_http_perl_module.so objs/ngx_http_perl_module-debug.so \
-  && mv objs/ngx_stream_geoip_module.so objs/ngx_stream_geoip_module-debug.so \
-  && ./configure $CONFIG \
+  && tar -zxC /usr/src -f ngx_cache_purge.tar.gz \
+  && tar -zxC /usr/src -f ngx_http_geoip2_module.tar.gz \
+  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz ngx_cache_purge.tar.gz ngx_http_geoip2_module.tar.gz
+
+WORKDIR /usr/src/nginx-$NGINX_VERSION
+
+RUN ./configure $NGINX_CONFIG \
   && make -j$(getconf _NPROCESSORS_ONLN) \
   && make install \
   && rm -rf /etc/nginx/html/ \
   && mkdir /etc/nginx/conf.d/ \
-  && mkdir -p /usr/share/nginx/html/ \
-  && install -m644 html/index.html /usr/share/nginx/html/ \
-  && install -m644 html/50x.html /usr/share/nginx/html/ \
-  && install -m755 objs/nginx-debug /usr/sbin/nginx-debug \
-  && install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so \
-  && install -m755 objs/ngx_http_image_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_image_filter_module-debug.so \
-  && install -m755 objs/ngx_http_geoip_module-debug.so /usr/lib/nginx/modules/ngx_http_geoip_module-debug.so \
-  && install -m755 objs/ngx_http_perl_module-debug.so /usr/lib/nginx/modules/ngx_http_perl_module-debug.so \
-  && install -m755 objs/ngx_stream_geoip_module-debug.so /usr/lib/nginx/modules/ngx_stream_geoip_module-debug.so \
   && ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
   && strip /usr/sbin/nginx* \
   && strip /usr/lib/nginx/modules/*.so \
-  && rm -rf /usr/src/nginx-$NGINX_VERSION \
   \
   # Bring in gettext so we can get `envsubst`, then throw
   # the rest away. To do this, we need to install `gettext`
@@ -279,16 +284,24 @@ RUN (crontab -l; echo "* * * * * run-parts /etc/periodic/everymin") | crontab -
 RUN find /etc/periodic -type f -exec chmod +x {} +
 
 # Add Scripts
+RUN mkdir -p /usr/lib/git
 ADD scripts/pull /usr/bin/pull
 ADD scripts/push /usr/bin/push
+ADD scripts/flush_nginx_cache /usr/bin/flush_nginx_cache
 ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
 ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
+ADD scripts/git-setup.lib /usr/lib/git/git-setup.lib
 ADD scripts/start.sh /start.sh
-RUN chmod 755 /usr/bin/pull && chmod 755 /usr/bin/push && chmod 755 /usr/bin/letsencrypt-setup && chmod 755 /usr/bin/letsencrypt-renew && chmod 755 /start.sh
+RUN chmod 755 /usr/bin/pull && \
+  chmod 755 /usr/bin/push && \
+  chmod 755 /usr/bin/letsencrypt-setup && \
+  chmod 755 /usr/bin/letsencrypt-renew && \
+  chmod 755 /start.sh && \
+  chmod 755 /usr/bin/flush_nginx_cache
 
 # forward request and error logs to docker log collector
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log \
-#  && ln -sf /dev/stderr /var/log/nginx/error.log
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+  && ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 443 80
 CMD ["/start.sh"]
