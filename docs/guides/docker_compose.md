@@ -1,4 +1,3 @@
-
 ## Docker Compose Guide
 This guide will show you how to make a quick and easy docker compose file to get your container running using the compose tool.
 
@@ -7,17 +6,36 @@ This guide will show you how to make a quick and easy docker compose file to get
 Create a docker-compose.yml file with the following contents:
 
 ```
-version: '2'
-
+version: '3'
 services:
-  nginx-php-fpm:
+  site:
     image: magemonkey/grav-docker:latest
-    restart: always
+    ports:
+      - "80:80"
     environment:
-      SSH_KEY: '<YOUR _KEY_HERE>'
-      GIT_REPO: 'git@github.com:<YOUR_ACCOUNT>/<YOUR_REPO>.git'
-      GIT_EMAIL: 'void@ngd.io'
-      GIT_NAME: '<YOUR_NAME>'
+      - "ERRORS=1"
+      - "DOMAIN=localhost"
+      - "GIT_EMAIL=gituser@email.com"
+      - "GIT_NAME=your name"
+      - "PUID=1000" # Change to UID of your current computer user
+      - "FASTCGI_CACHE=0"
+      - "MAX_EXECUTION_TIME=120"
+      - "PHP_MEM_LIMIT=256"
+      - "USE_GEOIP=1"
+      - "NGINX_DEBUG_HEADERS=1"
+      - "GIT_USE_SSH=1"
+      - "SSH_KEY=LONG_BASE64_ENCODED_KEY"
+      - "GIT_REPO=git@gitlab.com:username/reponame.git"
+      - "GIT_BRANCH=master"
+      - "GRAV_ADMIN=admin"
+      - "GIT_PUSH=1"
+      - "TIMEZONE=America/Los_Angeles"
+    volumes:
+      - "user:/var/www/html/user:cached"
+      - "backup:/var/www/html/backup:cached"
+volumes:
+  backup: 
+  user: 
 ```
 You can of course expand on this and add volumes, or extra environment parameters as defined in the [config flags](../config_flags.md) documentation.
 
