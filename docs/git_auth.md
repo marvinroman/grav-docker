@@ -23,8 +23,17 @@ docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERN
 
 #### Preparing your SSH key
 The container has the option for you to pass it the __SSH_KEY__ variable with a **base64** encoded **private** key. First generate your key and then make sure to add it to github and give it write permissions if you want to be able to push code from the container. Then run:
+
+##### Create an SSH Key
+```bash
+ssh-keygen -t rsa -b 4096 -N '' -f /path_to_ssh_key/key_name
 ```
-base64 -w 0 /path_to_your_private_key
+
+##### Convert Key using Base64
+```bash
+cd /path_too_ssh_key
+base64 -i key_name -o key_name.base64
+cat key_name.base64
 ```
 **Note:** Copy the output, but be careful not to copy your prompt
 
