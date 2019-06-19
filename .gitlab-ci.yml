@@ -5,8 +5,6 @@ services:
 stages:
   - build_latest
   - build_tags
-  - build_skeleton_opss
-  - build_skeleton_l2wgs
 
 before_script:
   - echo Logging in to $CI_REGISTRY...
