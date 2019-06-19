@@ -12,7 +12,7 @@ Looking for testers & contributors to bring this project out of Alpha. If you ha
 ### Versions
 Docker Tag | Git Release | Grav Version | Nginx Version | PHP Version | Alpine Version
 -----|-------|-----|------|--------|--------
-latest/1.0 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
+latest/0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
 skeleton-open-publishing-space-v1.5.5 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
 skeleton-learn2-with-git-sync-v1.5.2 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
 develop | Develop Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
