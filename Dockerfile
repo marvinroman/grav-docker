@@ -42,9 +42,18 @@ RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/co
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Install PHP required extensions
-ENV PHP_REQS "curl ctype dom json mbstring openssl session xml"
-RUN for req in ${PHP_REQS}; do apk add --no-cache php7-$req; done 
+ENV PHP_REQS "ctype \
+  dom \
+  exif \
+  gd \
+  iconv \
+  json \
+  mbstring \
+  simplexml \
+  xml\
+  zip"
 RUN apk add --no-cache --virtual .php-libs \
+  curl \
   freetype \
   libjpeg-turbo \
   libpng \
@@ -55,6 +64,7 @@ RUN apk add --no-cache --virtual .php-libs \
   zlib
 
 RUN apk add --no-cache --virtual .php-build-deps \
+  curl-dev \
   freetype-dev \
   libjpeg-turbo-dev \
   libpng-dev \
@@ -71,7 +81,8 @@ RUN docker-php-ext-configure gd \
   --with-png-dir=/usr/include/ \
   --with-webp-dir=/usr/include/ \
   --with-xpm-dir=/usr/include/ && \
-  docker-php-ext-install -j$(nproc) exif gd iconv simplexml zip && \
+  docker-php-ext-install -j$(nproc) $PHP_REQS && \
+  docker-php-ext-enable $PHP_REQS && \
   docker-php-source delete
 
 # @TODO: compile NGINX w/NAXSI
