@@ -153,6 +153,18 @@ if [ ! -z "$PUID" ]; then
   groupmod -g $PGID nginx
 fi
 
+# enable multisite
+if [[ ! -z "$MULTISITE" ]]; then 
+  if [[ "$MULTISITE" == "subdomain" ]]; then 
+    echo "Enabling multisite subdomain setup"
+    mv /usr/local/lib/grav/setup_subdomain.php ${WEBROOT}/setup.php 
+  fi 
+  if [[ "$MULTISITE" == "subdirectory" ]]; then  
+    echo "Enabling multisite subdirectory setup"
+    mv /usr/local/lib/grav/setup_subdirectory.php ${WEBROOT}/setup.php 
+  fi 
+fi 
+
 # reset file permissions
 if [ -z "$SKIP_CHOWN" ]; then
   echo "Changing file ownership";

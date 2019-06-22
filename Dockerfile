@@ -310,6 +310,9 @@ RUN chmod 755 /usr/bin/pull && \
   chmod 755 /start.sh && \
   chmod 755 /usr/bin/flush_nginx_cache
 
+ADD libs /usr/local/lib/grav 
+RUN chown -R nginx.nginx /usr/local/lib/grav 
+
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
