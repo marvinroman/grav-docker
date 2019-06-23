@@ -11,7 +11,6 @@ GIT_EMAIL | Set your email for code pushing (required for git to work)
 GIT_NAME | Set your name for code pushing (required for git to work)  
 GIT_REPO | URL to the repository containing your source code. If you are using a personal token, this is the https URL without `https://` (e.g `github.com/project/`). For ssh prepend with `git@` (e.g `git@github.com/project.git`)  
 GIT_BRANCH | Select a specific branch (optional)  
-GIT_BARE | Set to 1 to clone as a bare repo  
 GIT_TAG | Specify a specific git tag (optional)  
 GIT_COMMIT | Specify a specific git commit (optional)  
 SSH_KEY | Private SSH deploy key for your repository base64 encoded (requires write permissions for pushing)  
