@@ -5,4 +5,8 @@ We are now introducing versioning so users can stick to specific versions of sof
 
 The latest tag will always follow the master branch in git. the other versions will have releases attached.
 
-
+>This follows the format MAJOR.MINOR.PATCH (eg, 1.2.6)
+>
+- MAJOR version changes to NGINX, PHP-FPM, Alpine, Grav or potential breaking feature changes
+- MINOR version changes to NGINX, PHP-FPM, Grav or scripts that are still backwards-compatible with previous versions
+- PATCH version minor changes and bug fixes
