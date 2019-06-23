@@ -28,7 +28,7 @@ if [ ! -z "$GIT_REPO" ]; then
     git submodule update --recursive || exit 1
   else 
     rm -rf ${GIT_DIR}/
-    git clone ${GIT_BARE} -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
+    git clone -b ${GIT_BRANCH} ${GIT_REPO} ${GIT_DIR} || exit 1
   fi
 
   cd ${GIT_DIR}
@@ -40,4 +40,4 @@ if [ ! -z "$GIT_REPO" ]; then
   fi
 fi
 
-chown -R nginx.nginx ${GIT_DIR}
+find ${GIT_DIR} ! -user nginx -exec chown nginx.nginx {} + &
