@@ -35,7 +35,7 @@ EOF
   git add . || exit 1
   git commit -a -m 'automated push' || exit 1
   git remote add origin ${GIT_REPO} || git remote set-url origin ${GIT_REPO}
-  git push origin ${GIT_BRANCH} || exit 1
+  git push origin ${GIT_BRANCH} &
 fi
 
-chown -R nginx.nginx ${GIT_DIR}/
+find ${GIT_DIR} ! -user nginx -exec chown nginx.nginx {} + &
