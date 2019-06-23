@@ -40,4 +40,4 @@ if [ ! -z "$GIT_REPO" ]; then
   fi
 fi
 
-chown -R nginx.nginx ${GIT_DIR}
+find ${GIT_DIR} ! -user nginx -exec chown nginx.nginx {} + &
