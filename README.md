@@ -10,12 +10,14 @@ This is a Docker running NGINX & PHP-FPM. Pre-installed with the latest version 
 Looking for testers & contributors to bring this project out of Alpha. If you have any issues or suggestions please open an issue or pull request on the [GitLab Page](https://gitlab.com/marvinroman/grav-docker).
 
 ### Versions
-Docker Tag | Git Release | Grav Version | Nginx Version | PHP Version | Alpine Version
------|-------|-----|------|--------|--------
-latest/0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
-skeleton-open-publishing-space-v1.5.5 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
-skeleton-learn2-with-git-sync-v1.5.2 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
-develop | Develop Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9
+Docker Tag | Version | Git Release | Grav Version | Nginx Version | PHP Version | Alpine Version | Status
+-----|------ | -------|-----|------|--------|-------- | -------
+0.1 | 0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
+latest/0.1.1 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes hotfix to speed up startup)
+skeleton-open-publishing-space-v1.5.5 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
+skeleton-learn2-with-git-sync-v1.5.2 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
+develop | Develop Branch | 0.1 | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Development
+feature-multisite | Multisite Branch | 0.1 | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Experimental
 
 ### DockerHub Link
 - [https://hub.docker.com/r/magemonkey/grav-docker](https://hub.docker.com/r/magemonkey/grav-docker)

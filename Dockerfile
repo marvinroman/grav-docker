@@ -1,7 +1,7 @@
 FROM php:7.3.6-fpm-alpine3.9
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
-LABEL version="0.1"
+LABEL version="0.1.2"
 
 ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
@@ -15,6 +15,7 @@ ENV LIBMAXMINDDB_VERSION 1.3.2
 ENV GEOIP2_MODULE_VERSION 3.2
 ENV LUAJIT_LIB=/usr/lib
 ENV LUAJIT_INC=/usr/include/luajit-2.1
+ENV GRAV_VERSION 1.6.11
 
 # build deps
 ENV BUILD_DEPS "autoconf \
@@ -264,18 +265,14 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
 #    ln -s /etc/php7/php.ini /etc/php7/conf.d/php.ini && \
 #    find /etc/php7/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 
-# Install Composer Globally
-WORKDIR /tmp
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-  php -r "if (hash_file('sha384', 'composer-setup.php') === '48e3236262b34d30969dca3c37281b3b4bbe3221bda826ac6a9a62d6444cdb0dcd0615698a5cbe587c3f0fe57a54d8f5') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-  php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-  php -r "unlink('composer-setup.php');"
-
 # Install Grav w/Git Sync plugin
+WORKDIR /var/www 
 RUN rm -rf /var/www/html
 RUN chown -R nginx:nginx /var/www
 USER nginx
-RUN composer create-project getgrav/grav /var/www/html
+RUN curl -fSL https://github.com/getgrav/grav/releases/download/${GRAV_VERSION}/grav-v${GRAV_VERSION}.zip -o grav-v${GRAV_VERSION}.zip
+RUN unzip grav-v${GRAV_VERSION}.zip
+RUN mv grav html 
 WORKDIR /var/www/html
 COPY favicon.ico /var/www/html/favicon.ico
 
