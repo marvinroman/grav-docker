@@ -165,15 +165,6 @@ if [[ ! -z "$MULTISITE" ]]; then
   fi 
 fi 
 
-# reset file permissions
-if [ -z "$SKIP_CHOWN" ]; then
-  echo "Changing file ownership";
-  chown -R nginx.nginx $WEBROOT;
-  chown -R nginx.nginx /var/www/errors;
-  echo "Changing directory permissions";
-  find $WEBROOT -type d -exec chmod 755 {} \;
-fi
-
 # enable NAXSI firewall
 if [[ "$NAXSI" == "1" ]]; then
   echo "Activating NAXSI"
@@ -240,7 +231,7 @@ if [ ${#PLUGINS[@]} -gt 0 ]; then
   IFS=',';
   for plugin in $PLUGINS; do 
     echo "Installing plugin ${plugin}"
-    su-exec nginx ${WEBROOT}/bin/gpm install -n $plugin;
+    ${WEBROOT}/bin/gpm install -n $plugin;
   done 
   IFS=' ';
 fi 
@@ -248,7 +239,7 @@ fi
 # if theme specified then install 
 if [ -n "$THEME" ]; then 
   echo "Installing theme ${THEME}"
-  su-exec nginx ${WEBROOT}/bin/gpm install -n $THEME;
+  ${WEBROOT}/bin/gpm install -n $THEME;
 fi 
 
 # Set custom admin URI
@@ -258,7 +249,7 @@ if [[ ! -x "$GRAV_ADMIN" ]]; then
   if [[ ! -f "${WEBROOT}/user/config/plugins/admin.yaml" ]]; then 
     if [[ ! -f "${WEBROOT}/user/plugins/admin/admin.yaml" ]]; then 
       echo "Installing admin plugin"
-      su-exec nginx ${WEBROOT}/bin/gpm install -n admin 
+      ${WEBROOT}/bin/gpm install -n admin 
     fi 
     echo "Copying admin.yaml to config/plugins directory"
     cp ${WEBROOT}/user/plugins/admin/admin.yaml ${WEBROOT}/user/config/plugins/admin.yaml
@@ -312,8 +303,19 @@ fi
 # Unless KEEP_NGINX_SRC set remove the NGINX source code
 if [ -z "$KEEP_NGINX_SRC" ]; then 
   echo "Removing NGINX source code"
-  rm -rf /usr/src/nginx-$NGINX_VERSION
+  rm -rf /usr/src/nginx-$NGINX_VERSION &
 fi 
+
+# ensure that the minimum directories are writable by nginx user
+chown nginx.nginx $WEBROOT ${WEBROOT}/cache ${WEBROOT}/data 
+
+# reset file permissions
+if [ -z "$SKIP_CHOWN" ]; then
+  echo "Changing file ownership";
+  find $WEBROOT /var/www/errors ! -user nginx -exec chown nginx.nginx {} + &
+  echo "Changing directory permissions";
+  find $WEBROOT -type d -exec chmod 755 {} + &
+fi
 
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
