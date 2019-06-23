@@ -51,10 +51,6 @@ PREP_USER_VOLUME | Copy backup of user directory to mounted user directory
 PLUGINS | Comma separated list of plugins you want installed
 THEME | Public theme you want installed from the Grav site
 GRAV_ADMIN | Set to URI that you want to replace `/admin`  
-<<<<<<< HEAD
-KEEP_NGINX_SRC | Set if you want to keep NGINX source code for testing new compiling
-MULTISITE | Set to `subdirectory` or `subdomain` to setup multisite
-=======
 
 ### SYSTEM
 
@@ -65,4 +61,3 @@ PGID | Set to GroupId you want to use for nginx (helps permissions when using lo
 SKIP_CHOWN | Set to 1 to avoid running chown -Rf on /var/www/html
 TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email
->>>>>>> hotfix-0.1.1
