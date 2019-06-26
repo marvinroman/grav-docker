@@ -1,7 +1,5 @@
 FROM php:7.3.6-fpm-alpine3.9
 
-LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
-LABEL version="0.1.3"
 
 ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
@@ -294,6 +292,9 @@ RUN chmod a+x /start.sh
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
+
+LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
+LABEL version="0.1.3"
 
 EXPOSE 443 80
 CMD ["/start.sh"]
