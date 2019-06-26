@@ -10,16 +10,13 @@ ENV SKELETON grav-skeleton-open-publishing-space-site
 # Install skeleton
 WORKDIR /var/www 
 RUN rm -rf ${WEBROOT}
-USER nginx
 RUN curl -fSL "https://github.com/hibbitts-design/grav-skeleton-open-publishing-space/releases/download/${VERSION}/${SKELETON}.zip" -o ${SKELETON}.zip 
 RUN unzip -q ${SKELETON}.zip
 RUN mv ${SKELETON} html 
 RUN rm -f ${SKELETON}.zip
 
-USER root
-RUN mkdir -p /var/lib/grav/user
-
 # Create copy of user directory to copy for mounted volumes
+RUN mkdir -p /var/lib/grav/user
 RUN rsync -a --del \
     /var/www/html/user/ \
     /var/lib/grav/user 
