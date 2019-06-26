@@ -1,7 +1,7 @@
 FROM php:7.3.6-fpm-alpine3.9
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
-LABEL version="0.1.2"
+LABEL version="0.1.3"
 
 ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
@@ -265,19 +265,15 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
 #    ln -s /etc/php7/php.ini /etc/php7/conf.d/php.ini && \
 #    find /etc/php7/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 
-# Install Grav w/Git Sync plugin
-WORKDIR /var/www 
-RUN rm -rf /var/www/html
-RUN chown -R nginx:nginx /var/www
-USER nginx
-RUN curl -fSL https://github.com/getgrav/grav/releases/download/${GRAV_VERSION}/grav-v${GRAV_VERSION}.zip -o grav-v${GRAV_VERSION}.zip
-RUN unzip grav-v${GRAV_VERSION}.zip
-RUN mv grav html 
-WORKDIR /var/www/html
+COPY usr /usr 
+RUN find /usr/bin -type f -exec chmod a+x {} +
+
+# Install Grav 
+RUN /usr/bin/install-grav 
+WORKDIR /var/www/html 
 COPY favicon.ico /var/www/html/favicon.ico
 
 # Prep user copy for mounted user directories
-USER root
 RUN mkdir -p /var/lib/grav/user
 RUN rsync -a --del \
   /var/www/html/user/ \
@@ -291,21 +287,9 @@ RUN chown -R nginx.nginx /var/www/errors
 RUN (crontab -l; echo "* * * * * run-parts /etc/periodic/everymin") | crontab -
 RUN find /etc/periodic -type f -exec chmod +x {} +
 
-# Add Scripts
-RUN mkdir -p /usr/lib/git
-ADD scripts/pull /usr/bin/pull
-ADD scripts/push /usr/bin/push
-ADD scripts/flush_nginx_cache /usr/bin/flush_nginx_cache
-ADD scripts/letsencrypt-setup /usr/bin/letsencrypt-setup
-ADD scripts/letsencrypt-renew /usr/bin/letsencrypt-renew
-ADD scripts/git-setup.lib /usr/lib/git/git-setup.lib
+# Add Start Script
 ADD scripts/start.sh /start.sh
-RUN chmod 755 /usr/bin/pull && \
-  chmod 755 /usr/bin/push && \
-  chmod 755 /usr/bin/letsencrypt-setup && \
-  chmod 755 /usr/bin/letsencrypt-renew && \
-  chmod 755 /start.sh && \
-  chmod 755 /usr/bin/flush_nginx_cache
+RUN chmod a+x /start.sh
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \

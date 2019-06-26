@@ -8,9 +8,9 @@ ENV WEBROOT /var/www/html
 ENV SKELETON grav-skeleton-open-publishing-space-site
 
 # Install skeleton
-USER nginx
 WORKDIR /var/www 
 RUN rm -rf ${WEBROOT}
+USER nginx
 RUN curl -fSL "https://github.com/hibbitts-design/grav-skeleton-open-publishing-space/releases/download/${VERSION}/${SKELETON}.zip" -o ${SKELETON}.zip 
 RUN unzip -q ${SKELETON}.zip
 RUN mv ${SKELETON} html 
