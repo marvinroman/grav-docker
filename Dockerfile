@@ -274,7 +274,6 @@ WORKDIR /var/www/html
 COPY favicon.ico /var/www/html/favicon.ico
 
 # Prep user copy for mounted user directories
-USER root
 RUN mkdir -p /var/lib/grav/user
 RUN rsync -a --del \
   /var/www/html/user/ \
