@@ -13,11 +13,13 @@ Looking for testers & contributors to bring this project out of Alpha. If you ha
 Docker Tag | Version | Git Release | Grav Version | Nginx Version | PHP Version | Alpine Version | Status
 -----|------ | -------|-----|------|--------|-------- | -------
 0.1 | 0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
-latest/0.1.1 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes hotfix to speed up startup)
-skeleton-open-publishing-space-v1.5.5 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
-skeleton-learn2-with-git-sync-v1.5.2 | 0.0.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha
-develop | Develop Branch | 0.1 | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Development
-feature-multisite | Multisite Branch | 0.1 | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Experimental
+0.1.1 | 0.1.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes hotfix to speed up startup)
+latest/0.1.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes specific Grav Version)
+skeleton-open-publishing-space-v1.5.5 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
+skeleton-learn2-with-git-sync-v1.5.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
+develop | 0.1.2 | Develop Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Development
+feature-multisite | 0.1.1 | Multisite Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Experimental
+release-0.2 | 0.2  | Release-0.2 Branch| 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Experimental (includes multi-site feature)  
 
 ### DockerHub Link
 - [https://hub.docker.com/r/magemonkey/grav-docker](https://hub.docker.com/r/magemonkey/grav-docker)
