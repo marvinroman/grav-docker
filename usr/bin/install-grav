@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [[ -z "$WEBROOT" ]]; then 
+  WEBROOT=/var/www/html
+fi
+
+if [[ -z "$GRAV_VERSION" ]]; then 
+  GRAV_VERSION=1.6.11
+fi
+
+cd /tmp 
+rm -rf $WEBROOT
+curl -fSL https://github.com/getgrav/grav/releases/download/${GRAV_VERSION}/grav-v${GRAV_VERSION}.zip -o grav-v${GRAV_VERSION}.zip
+unzip grav-v${GRAV_VERSION}.zip
+rm -rf grav-v${GRAV_VERSION}.zip
+mv grav $WEBROOT
