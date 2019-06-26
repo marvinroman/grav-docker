@@ -58,6 +58,5 @@ Name | Description
 ------------------------- |----------------------------------------------------------------------------------------------------------------
 PUID | Set to UserID you want to use for nginx (helps permissions when using local volume)
 PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
-SKIP_CHOWN | Set to 1 to avoid running chown -Rf on /var/www/html
 TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email

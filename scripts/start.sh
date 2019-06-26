@@ -306,16 +306,11 @@ if [ -z "$KEEP_NGINX_SRC" ]; then
   rm -rf /usr/src/nginx-$NGINX_VERSION &
 fi 
 
-# ensure that the minimum directories are writable by nginx user
-chown nginx.nginx $WEBROOT ${WEBROOT}/cache ${WEBROOT}/data 
-
 # reset file permissions
-if [ -z "$SKIP_CHOWN" ]; then
-  echo "Changing file ownership";
-  find $WEBROOT /var/www/errors ! -user nginx -exec chown nginx.nginx {} + &
-  echo "Changing directory permissions";
-  find $WEBROOT -type d -exec chmod 755 {} + &
-fi
+echo "Changing file ownership";
+find $WEBROOT /var/www/errors ! -user nginx -exec chown nginx.nginx {} + &
+echo "Changing directory permissions";
+find $WEBROOT -type d -exec chmod 755 {} + &
 
 # Start supervisord and services
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
