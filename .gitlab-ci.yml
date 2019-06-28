@@ -3,12 +3,30 @@ services:
   - docker:dind
 
 stages:
+  - build_tags
   - build_release
+  - build_develop
+  - build_feature
 
 before_script:
   - echo Logging in to $CI_REGISTRY...
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - docker info | grep Registry
+
+build_tags:
+  stage: build_tags
+  script: 
+    - echo Build started on `date` for $CI_COMMIT_TAG
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - docker build -f skeletons/open-publishing-space-site/Dockerfile -t $CI_REGISTRY_IMAGE:skeleton-open-publishing-space-v1.5.5 .
+    - docker push $CI_REGISTRY_IMAGE:skeleton-open-publishing-space-v1.5.5
+    - docker build -f skeletons/learn2-with-git-sync/Dockerfile -t $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2 .
+    - docker push $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2
+  only:
+    - /^[0-9.]+$/
 
 build_release:
   stage: build_release
@@ -19,3 +37,23 @@ build_release:
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   only:
     - /^release-[0-9.]+$/
+
+build_develop:
+  stage: build_develop
+  script:
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:develop .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:develop
+  only:
+    - develop
+
+build_feature:
+  stage: build_feature
+  script:
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - /^feature.*$/
