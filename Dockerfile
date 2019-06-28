@@ -1,6 +1,5 @@
 FROM php:7.3.6-fpm-alpine3.9
 
-
 ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
@@ -294,7 +293,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
-LABEL version="0.1.3"
+LABEL version="0.1.4"
 
 EXPOSE 443 80
 CMD ["/start.sh"]
