@@ -4,6 +4,9 @@ services:
 
 stages:
   - build_tags
+  - build_release
+  - build_develop
+  - build_feature
 
 before_script:
   - echo Logging in to $CI_REGISTRY...
@@ -24,3 +27,33 @@ build_tags:
     - docker push $CI_REGISTRY_IMAGE:skeleton-learn2-with-git-sync-v1.5.2
   only:
     - /^[0-9.]+$/
+
+build_release:
+  stage: build_release
+  script: 
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - /^release-[0-9.]+$/
+
+build_develop:
+  stage: build_develop
+  script:
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:develop .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:develop
+  only:
+    - develop
+
+build_feature:
+  stage: build_feature
+  script:
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - /^feature.*$/
