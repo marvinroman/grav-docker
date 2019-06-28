@@ -10,8 +10,8 @@ before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - docker info | grep Registry
 
-build_latest:
-  stage: build_latest
+build_develop:
+  stage: build_develop
   script:
     - echo Build started on `date` for $CI_COMMIT_REF_NAME
     - docker build -t $CI_REGISTRY_IMAGE:develop .
