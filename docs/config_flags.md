@@ -27,6 +27,8 @@ REAL_IP_FROM | set to your CIDR block for real ip in logs
 SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
 SSL_SELF_SIGNED | Set to 1 to automate self signed SSL certificate
+SSL_CERT | base64 encoded SSL Certificate
+SSL_KEY | base64 encoded SSL key  
 NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the browser
 USE_GEOIP | Set to 1 for NGINX to pass COUNTRY_CODE, COUNTRY_NAME & CITY_NAME to PHP
 FASTCGI_CACHE | Set to 1 to enable fastcgi caching

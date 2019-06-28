@@ -21,7 +21,7 @@ skeleton-open-publishing-space-v1.5.5 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 
 skeleton-learn2-with-git-sync-v1.5.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
 develop | 0.1.2 | Develop Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Development
 feature-multisite | 0.1.1 | Multisite Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Experimental
-release-0.2 | 0.2  | Release-0.2 Branch| 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Experimental (includes multi-site feature, self_signed_ssl feature)  
+release-0.2 | 0.2  | Release-0.2 Branch| 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Experimental (includes multi-site feature, self_signed_ssl feature, custom_ssl feature)  
 
 ### DockerHub Link
 - [https://hub.docker.com/r/magemonkey/grav-docker](https://hub.docker.com/r/magemonkey/grav-docker)
