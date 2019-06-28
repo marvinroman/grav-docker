@@ -19,7 +19,8 @@ Docker Tag | Version | Git Release | Grav Version | Nginx Version | PHP Version 
 0.1.1 | 0.1.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes hotfix to speed up startup)
 0.1.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes specific Grav Version)
 0.1.3 | 0.1.3 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (moved install of grav to script)
-latest/0.1.4 | 0.1.3 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes letsencrypt fix for hosts like Mightyweb that have a slow loadbalancer deployment)
+0.1.4 | 0.1.4 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes letsencrypt fix for hosts like Mightyweb that have a slow loadbalancer deployment)
+latest/0.1.5 | 0.1.5 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (fix for admin page customization when config/plugin directory doesn't exist)
 skeleton-open-publishing-space-v1.5.5 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
 skeleton-learn2-with-git-sync-v1.5.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
 develop | 0.1.2 | Develop Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Development
