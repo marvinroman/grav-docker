@@ -4,10 +4,11 @@ echo "Create ssl certificate directory"
 mkdir -p /etc/letsencrypt/live/${DOMAIN}
 cd /etc/letsencrypt/live/${DOMAIN}
 
-echo "Create ssl certificate for domain $DOMAIN"
-openssl req -x509 -out fullchain.pem -keyout privkey.pem \
--newkey rsa:2048 -nodes -sha256 -subj "/CN=${DOMAIN}" -extensions EXT -config <( \
-printf "[dn]\nCN=${DOMAIN}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${DOMAIN}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+echo $SSL_CERT > fullchain.pem.base64
+base64 -d fullchain.pem.base64 > fullchain.pem
+
+echo $SSL_KEY > privkey.pem.base64
+base64 -d privkey.pem.base64 > privkey.pem
 
 echo "Link ssl config into sites-available directory"
 ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf

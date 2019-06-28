@@ -217,6 +217,10 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
     /usr/bin/create_self_signed &
   fi 
 
+  if [[ -n "$SSL_CERT" ]] && [[ -n "$SSL_KEY" ]]; then 
+    /usr/bin/set_custom_ssl &
+  fi 
+
   echo "Adding domain to default SSL config"
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
 
