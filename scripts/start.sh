@@ -86,6 +86,7 @@ fi
 if [[ "$USE_GEOIP" == "1" ]]; then 
   echo "Downloading GeoIP databases"
   /etc/periodic/monthly/geoip 
+
   echo "Activating GeoIP NGINX configurations"
   sed -i "s/# load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/load_module \/etc\/nginx\/modules\/ngx_http_geoip2_module.so;/" /etc/nginx/nginx.conf
   sed -i "s/# include \/etc\/nginx\/globals\/geoip.inc;/include \/etc\/nginx\/globals\/geoip.inc;/" /etc/nginx/nginx.conf
@@ -95,16 +96,19 @@ if [[ "$USE_GEOIP" == "1" ]]; then
 fi 
 
 # Set the desired timezone
-apk add --no-cache tzdata
+apk add --no-cache tzdata --virtual .tzdata 
 if [ -z "$TIMEZONE" ]; then 
   TIMEZONE=UTC
 fi 
 echo "Changing PHP timezone to ${TIMEZONE}"
+
 echo date.timezone=$TIMEZONE > /usr/local/etc/php/conf.d/timezone.ini
 echo "Changins server timezone to ${TIMEZONE}"
+
 cp /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+
 echo $TIMEZONE > /etc/timezone 
-apk del tzdata
+apk del .tzdata 
 
 # Display errors in docker logs
 if [ ! -z "$PHP_ERRORS_STDERR" ]; then
@@ -135,6 +139,7 @@ fi
 if [ ! -z "$PHP_MAX_EXECUTION_TIME" ]; then
   echo "Altering PHP max_execution_time to ${PHP_MAX_EXECUTION_TIME}"
   sed -i "s/max_execution_time = 30/max_execution_time = ${PHP_MAX_EXECUTION_TIME}/g" /usr/local/etc/php/conf.d/docker-vars.ini
+
   echo "Altering NGINX fastcgi_read_timeout to ${PHP_MAX_EXECUTION_TIME}"
   sed -i "s/fastcgi_read_timeout 10m;/fastcgi_read_timeout ${PHP_MAX_EXECUTION_TIME}s;/g" /etc/nginx/globals/grav.inc
 else
@@ -147,8 +152,10 @@ if [ ! -z "$PUID" ]; then
   if [ -z "$PGID" ]; then
     PGID=${PUID}
   fi
+
   echo "Altering nginx uid to ${PUID}"
   usermod -u $PUID nginx
+
   echo "Altering nginx gid to ${PGID}"
   groupmod -g $PGID nginx
 fi
@@ -192,22 +199,10 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
       echo "Running letsencrypt-setup"
       /usr/bin/letsencrypt-setup
     fi
-    echo "Copying letsencrypt-renew script into monthly cron"
-    cp /usr/bin/letsencrypt-renew /etc/periodic/monthly/letsencrypt-renew
   fi
 
   echo "Adding domain to default SSL config"
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
-
-  # redirect http to https
-  if [[ "$REDIRECT_SSL" == "1" ]]; then
-    echo "Removing default.conf"
-    rm -f /etc/nginx/sites-enabled/default.conf;
-    echo "Adding domain to default-redirect.conf"
-    sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
-    echo "Linking default-redirect.conf into sites-enabled directory"
-    ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
-  fi
 
   echo "make sure NGINX is stopped"
   /usr/sbin/nginx -s stop;
@@ -297,6 +292,7 @@ fi
 # reset file permissions
 echo "Changing file ownership";
 find $WEBROOT /var/www/errors ! -user nginx -exec chown nginx.nginx {} + &
+
 echo "Changing directory permissions";
 find $WEBROOT -type d -exec chmod 755 {} + &
 

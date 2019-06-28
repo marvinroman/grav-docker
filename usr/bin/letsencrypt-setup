@@ -2,8 +2,37 @@
 
 # Lets Encrypt
 if [ -z "$GIT_EMAIL" ] || [ -z "$DOMAIN" ]; then
- echo "You need the \$GIT_EMAIL and the \$DOMAIN Variables"
+    echo "You need the \$GIT_EMAIL and the \$DOMAIN Variables in order to use Letsencrypt SSL"
 else
- certbot certonly --nginx -d $DOMAIN --email $GIT_EMAIL -n --agree-tos
- ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+    echo "running certbot"
+    certbot certonly --nginx -d $DOMAIN --email $GIT_EMAIL -n --agree-tos
+
+    if [[ -d "/etc/letsencrypt/live/$DOMAIN" ]]; then 
+
+        echo "linking default-ssl into sites-enabled"
+        ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+
+        echo "Copying letsencrypt-renew script into weekly cron"
+        cp /usr/bin/letsencrypt-renew /etc/periodic/weekly/letsencrypt-renew
+
+        if [[ -f "/etc/periodic/15min/letsencrypt-setup" ]]; then 
+            echo "removing letsencrypt from 15min cron"
+            rm -f /etc/periodic/15min/letsencrypt-setup
+        fi 
+
+        # redirect http to https
+        if [[ "$REDIRECT_SSL" == "1" ]]; then
+            echo "Removing default.conf"
+            rm -f /etc/nginx/sites-enabled/default.conf;
+
+            echo "Adding domain to default-redirect.conf"
+            sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
+
+            echo "Linking default-redirect.conf into sites-enabled directory"
+            ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
+        fi
+    else 
+        echo "copying letsencrypt-setup into 15min cron"
+        cp /usr/bin/letsencrypt-setup /etc/periodic/15min/letsencrypt-setup
+    fi 
 fi
