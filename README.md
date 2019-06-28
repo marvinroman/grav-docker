@@ -1,6 +1,9 @@
 ![pipeline status](https://gitlab.com/marvinroman/grav-docker/badges/master/pipeline.svg)
-![docker hub](https://img.shields.io/docker/pulls/magemonkey/grav-docker.svg?style=flat-square)
-![docker hub](https://img.shields.io/docker/stars/magemonkey/grav-docker.svg?style=flat-square)
+![docker hub](https://img.shields.io/docker/pulls/marvinroman/grav-docker.svg?style=flat-square)
+![docker hub](https://img.shields.io/docker/stars/marvinroman/grav-docker.svg?style=flat-square)
+
+
+**Recently migrated from [https://hub.docker.com/r/magemonkey/grav-docker](https://hub.docker.com/r/magemonkey/grav-docker)**  
 
 ## Alpha/Experimental Status
 Consider this Docker to still be an Alpha experimental release. Don't use in production until you have tested thoroughly.
@@ -16,7 +19,8 @@ Docker Tag | Version | Git Release | Grav Version | Nginx Version | PHP Version 
 0.1.1 | 0.1.1 | Master Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes hotfix to speed up startup)
 0.1.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes specific Grav Version)
 0.1.3 | 0.1.3 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (moved install of grav to script)
-latest/0.1.4 | 0.1.3 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes letsencrypt fix for hosts like Mightyweb that have a slow loadbalancer deployment)
+0.1.4 | 0.1.4 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes letsencrypt fix for hosts like Mightyweb that have a slow loadbalancer deployment)
+latest/0.1.5 | 0.1.5 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (fix for admin page customization when config/plugin directory doesn't exist)
 skeleton-open-publishing-space-v1.5.5 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
 skeleton-learn2-with-git-sync-v1.5.2 | 0.1.2 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha
 develop | 0.1.2 | Develop Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Development
@@ -24,12 +28,12 @@ feature-multisite | 0.1.1 | Multisite Branch | 1.6.10 | 1.16.0 | 7.3.6 | 3.9 | E
 release-0.2 | 0.2  | Release-0.2 Branch| 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Experimental (includes multi-site feature, self_signed_ssl feature, custom_ssl feature)  
 
 ### DockerHub Link
-- [https://hub.docker.com/r/magemonkey/grav-docker](https://hub.docker.com/r/magemonkey/grav-docker)
+- [https://hub.docker.com/r/marvinroman/grav-docker](https://hub.docker.com/r/marvinroman/grav-docker)
 
 ## Quick Start
 To pull from docker hub:
 ```
-docker pull magemonkey/grav-docker:latest
+docker pull marvinroman/grav-docker:latest
 ```
 ## Grav Skeletons
 A Grav skeleton is an all-in-one package containing the core Grav system plus sample pages, plugins, configuration. These packages are a great way to get started with Grav.
@@ -39,7 +43,7 @@ Open Publishing (Blogging) Space uses a customized version of the Quark theme to
 
 Try it out. 
 ```
-docker run --rm -d -p 80:80 magemonkey/grav-docker:skeleton-open-publishing-space-v1.5.5
+docker run --rm -d -p 80:80 marvinroman/grav-docker:skeleton-open-publishing-space-v1.5.5
 ```  
 Browse to [localhost](http://localhost).
 
@@ -49,18 +53,18 @@ Learn2 with Git Sync, a sample documentation site using the Learn2 Git Sync them
 
 Try it out. 
 ```
-docker run --rm -d -p 80:80 magemonkey/grav-docker:skeleton-learn2-with-git-sync-v1.5.2
+docker run --rm -d -p 80:80 marvinroman/grav-docker:skeleton-learn2-with-git-sync-v1.5.2
 ```  
 Browse to [localhost](http://localhost).
 
 ### Running
 To simply run the container:
 ```
-docker run --rm -d magemonkey/grav-docker:<version>
+docker run --rm -d marvinroman/grav-docker:<version>
 ```
 To dynamically pull code from git when starting:
 ```
-docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' magemonkey/grav-docker:<version>
+docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' marvinroman/grav-docker:<version>
 ```
 
 You can then browse to ```http://<DOCKER_HOST>``` to view the default install files. To find your ```DOCKER_HOST``` use the ```docker inspect``` to get the IP address (normally 172.17.0.2)
