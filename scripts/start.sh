@@ -235,6 +235,7 @@ if [[ ! -x "$GRAV_ADMIN" ]]; then
       ${WEBROOT}/bin/gpm install -n admin 
     fi 
     echo "Copying admin.yaml to config/plugins directory"
+    mkdir -p ${WEBROOT}/user/config/plugins
     cp ${WEBROOT}/user/plugins/admin/admin.yaml ${WEBROOT}/user/config/plugins/admin.yaml
   fi 
   echo "Changing admin URL in "
