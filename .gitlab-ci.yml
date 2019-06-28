@@ -4,6 +4,7 @@ services:
 
 stages:
   - build_develop
+  - build_feature
 
 before_script:
   - echo Logging in to $CI_REGISTRY...
@@ -19,3 +20,13 @@ build_develop:
     - docker push $CI_REGISTRY_IMAGE:develop
   only:
     - develop
+
+build_feature:
+  stage: build_feature
+  script:
+    - echo Build started on `date` for $CI_COMMIT_REF_NAME
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker images
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    - /^feature.*$/
