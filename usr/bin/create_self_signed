@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [[ -z "$DOMAIN" ]]; then 
+    echo "DOMAIN environment must be set in order to create a self signed certificate"
+else 
+    echo "Create ssl certificate directory"
+    mkdir -p /etc/letsencrypt/live/${DOMAIN}
+    cd /etc/letsencrypt/live/${DOMAIN}
+
+    echo "Create ssl certificate for domain $DOMAIN"
+    openssl req -x509 -out fullchain.pem -keyout privkey.pem \
+    -newkey rsa:2048 -nodes -sha256 -subj "/CN=${DOMAIN}" -extensions EXT -config <( \
+    printf "[dn]\nCN=${DOMAIN}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${DOMAIN}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+
+    echo "Link ssl config into sites-available directory"
+    ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+
+    echo "Recreating SSL dhparams"
+    cd /etc/letsencrypt
+    openssl dhparam -out ssl-dhparams.pem.new 4096
+    mv ssl-dhparams.pem ssl-dhparams.pem.old
+    mv ssl-dhparams.pem.new ssl-dhparams.pem
+    
+    echo "restart NGINX"
+    nginx -t 
+    nginx -s reload
+
+    # redirect http to https
+    if [[ "$REDIRECT_SSL" == "1" ]]; then
+        echo "Removing default.conf"
+        rm -f /etc/nginx/sites-enabled/default.conf;
+
+        echo "Adding domain to default-redirect.conf"
+        sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
+
+        echo "Linking default-redirect.conf into sites-enabled directory"
+        ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
+    fi
+fi 
