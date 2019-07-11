@@ -20,10 +20,12 @@ if [ ! -z "$GIT_REPO" ]; then
     GIT_REPO=" https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO}"
   fi
 
+if [[ ! -f "${GIT_DIR}/.gitignore" ]]; then 
   cat << EOF > ${GIT_DIR}/.gitignore
 data/*
 !data/.gitkeep
 EOF
+fi 
 
   cd ${GIT_DIR}
 
