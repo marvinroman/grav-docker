@@ -63,3 +63,9 @@ PUID | Set to UserID you want to use for nginx (helps permissions when using loc
 PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
 TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email
+
+# DEVELOPMENT 
+
+Name | Description
+------------------------- |----------------------------------------------------------------------------------------------------------------
+ENABLE_SASS | Set to 1 to install SASS in order to compile SASS
