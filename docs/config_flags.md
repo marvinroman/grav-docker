@@ -26,6 +26,9 @@ REAL_IP_HEADER | set to 1 to enable real ip support in the logs
 REAL_IP_FROM | set to your CIDR block for real ip in logs
 SSL_ENABLED | Set to 1 to enable the SSL configuration
 SSL_LETS_ENCRYPT | Set to 1 to automate SSL creation using Let's Encrypt
+SSL_SELF_SIGNED | Set to 1 to automate self signed SSL certificate
+SSL_CERT | base64 encoded SSL Certificate
+SSL_KEY | base64 encoded SSL key  
 NGINX_DEBUG_HEADERS | Set to 1 to enable the sending of debug headers to the browser
 USE_GEOIP | Set to 1 for NGINX to pass COUNTRY_CODE, COUNTRY_NAME & CITY_NAME to PHP
 FASTCGI_CACHE | Set to 1 to enable fastcgi caching
@@ -60,3 +63,9 @@ PUID | Set to UserID you want to use for nginx (helps permissions when using loc
 PGID | Set to GroupId you want to use for nginx (helps permissions when using local volume)
 TIMEZONE | Set container timezone
 EMAIL_SERVER | Set to 1 to install and enable Postfix server to allow sending email
+
+# DEVELOPMENT 
+
+Name | Description
+------------------------- |----------------------------------------------------------------------------------------------------------------
+ENABLE_SASS | Set to 1 to install SASS in order to compile SASS

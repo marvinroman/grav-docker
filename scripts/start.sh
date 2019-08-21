@@ -160,6 +160,18 @@ if [ ! -z "$PUID" ]; then
   groupmod -g $PGID nginx
 fi
 
+# enable multisite
+if [[ ! -z "$MULTISITE" ]]; then 
+  if [[ "$MULTISITE" == "subdomain" ]]; then 
+    echo "Enabling multisite subdomain setup"
+    mv /usr/local/lib/grav/setup_subdomain.php ${WEBROOT}/setup.php 
+  fi 
+  if [[ "$MULTISITE" == "subdirectory" ]]; then  
+    echo "Enabling multisite subdirectory setup"
+    mv /usr/local/lib/grav/setup_subdirectory.php ${WEBROOT}/setup.php 
+  fi 
+fi 
+
 # enable NAXSI firewall
 if [[ "$NAXSI" == "1" ]]; then
   echo "Activating NAXSI"
@@ -200,6 +212,14 @@ if [[ "$SSL_ENABLED" == "1" ]]; then
       /usr/bin/letsencrypt-setup
     fi
   fi
+
+  if [[ "$SSL_SELF_SIGNED" == "1" ]]; then 
+    /usr/bin/create_self_signed &
+  fi 
+
+  if [[ -n "$SSL_CERT" ]] && [[ -n "$SSL_KEY" ]]; then 
+    /usr/bin/set_custom_ssl &
+  fi 
 
   echo "Adding domain to default SSL config"
   sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-ssl.conf;
@@ -257,6 +277,11 @@ command		    = /usr/sbin/postfix -c /etc/postfix start
 startsecs	    = 0
 autorestart   = false
 EOF
+fi 
+
+if [[ "$ENABLE_SASS" == "1" ]]; then
+  apk add npm
+  npm install -g sass
 fi 
 
 # Run SMTP server to send mail

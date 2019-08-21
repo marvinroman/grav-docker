@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "Create ssl certificate directory"
+mkdir -p /etc/letsencrypt/live/${DOMAIN}
+cd /etc/letsencrypt/live/${DOMAIN}
+
+echo $SSL_CERT > fullchain.pem.base64
+base64 -d fullchain.pem.base64 > fullchain.pem
+
+echo $SSL_KEY > privkey.pem.base64
+base64 -d privkey.pem.base64 > privkey.pem
+
+echo "Link ssl config into sites-available directory"
+ln -s /etc/nginx/sites-available/default-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+
+echo "Recreating SSL dhparams"
+cd /etc/letsencrypt
+openssl dhparam -out ssl-dhparams.pem.new 4096
+mv ssl-dhparams.pem ssl-dhparams.pem.old
+mv ssl-dhparams.pem.new ssl-dhparams.pem
+
+/usr/bin/redirect_ssl
