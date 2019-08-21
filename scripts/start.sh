@@ -259,6 +259,11 @@ autorestart   = false
 EOF
 fi 
 
+if [[ "$ENABLE_SASS" == "1" ]]; then
+  apk add npm
+  npm install -g sass
+fi 
+
 # Run SMTP server to send mail
 if [[ "$GIT_PUSH" == "1" ]] || [[ "$FASTCGI_CACHE" == "1" ]]; then 
 
