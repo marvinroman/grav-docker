@@ -4,7 +4,7 @@ ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 
-ENV NGINX_VERSION 1.16.0
+ENV NGINX_VERSION 1.16.1
 ENV FRICKLE_MODULE_VERSION=2.3
 ENV LUA_MODULE_VERSION 0.10.14
 ENV DEVEL_KIT_MODULE_VERSION 0.3.0
@@ -12,7 +12,7 @@ ENV LIBMAXMINDDB_VERSION 1.3.2
 ENV GEOIP2_MODULE_VERSION 3.2
 ENV LUAJIT_LIB=/usr/lib
 ENV LUAJIT_INC=/usr/include/luajit-2.1
-ENV GRAV_VERSION 1.6.11
+ENV GRAV_VERSION 1.6.16
 
 # build deps
 ENV BUILD_DEPS "autoconf \
@@ -287,6 +287,9 @@ RUN find /etc/periodic -type f -exec chmod +x {} +
 # Add Start Script
 ADD scripts/start.sh /start.sh
 RUN chmod a+x /start.sh
+
+ADD libs /usr/local/lib/grav 
+RUN chown -R nginx.nginx /usr/local/lib/grav 
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \

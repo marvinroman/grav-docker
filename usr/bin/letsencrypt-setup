@@ -20,17 +20,7 @@ else
             rm -f /etc/periodic/15min/letsencrypt-setup
         fi 
 
-        # redirect http to https
-        if [[ "$REDIRECT_SSL" == "1" ]]; then
-            echo "Removing default.conf"
-            rm -f /etc/nginx/sites-enabled/default.conf;
-
-            echo "Adding domain to default-redirect.conf"
-            sed -i "s/##DOMAIN##/${DOMAIN}/g" /etc/nginx/sites-available/default-redirect.conf;
-
-            echo "Linking default-redirect.conf into sites-enabled directory"
-            ln -s /etc/nginx/sites-available/default-redirect.conf /etc/nginx/sites-enabled/default.conf;
-        fi
+        /usr/bin/redirect_ssl
     else 
         echo "copying letsencrypt-setup into 15min cron"
         cp /usr/bin/letsencrypt-setup /etc/periodic/15min/letsencrypt-setup
