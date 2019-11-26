@@ -1,4 +1,4 @@
-![pipeline status](https://gitlab.com/marvinroman/grav-docker/badges/master/pipeline.svg)
+[![pipeline status](https://gitlab.com/marvinroman/grav-docker/badges/0.2.1/pipeline.svg)](https://gitlab.com/marvinroman/grav-docker/commits/0.2.1)
 ![docker hub](https://img.shields.io/docker/pulls/marvinroman/grav-docker.svg?style=flat-square)
 ![docker hub](https://img.shields.io/docker/stars/marvinroman/grav-docker.svg?style=flat-square)
 
