@@ -22,7 +22,7 @@ Docker Tag | Version | Git Release | Grav Version | Nginx Version | PHP Version 
 0.1.4 | 0.1.4 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (includes letsencrypt fix for hosts like Mightyweb that have a slow loadbalancer deployment)
 0.1.5 | 0.1.5 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (fix for admin page customization when config/plugin directory doesn't exist)
 0.1.7 | 0.1.7 | Master Branch | 1.6.11 | 1.16.0 | 7.3.6 | 3.9 | Alpha (fix for git push to only create .gitignore if it doesn't exist)
-latest/0.2 | 0.2 | Master Branch | 1.6.16 | 1.16.1 | 7.3.6 | 3.9 | Alpha (fix for git push to only create .gitignore if it doesn't exist)
+latest/0.2.1 | 0.2 | Master Branch | 1.6.16 | 1.16.1 | 7.3.6 | 3.9 | Alpha (fix for git push to only create .gitignore if it doesn't exist)
 skeleton-open-publishing-space-v1.5.5 | 0.2 | Master Branch | 1.6.16 | 1.16.1 | 7.3.6 | 3.9 | Alpha
 skeleton-learn2-with-git-sync-v1.5.2 | 0.2 | Master Branch | 1.6.16 | 1.16.1 | 7.3.6 | 3.9 | Alpha
 develop | 0.2 | Develop Branch | 1.6.16 | 1.16.1 | 7.3.6 | 3.9 | Development
