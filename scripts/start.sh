@@ -23,15 +23,15 @@ echo "Running git pull script"
 /usr/bin/pull
 
 # Enable custom nginx config files if they exist
-if [ -f ${WEBROOT}/conf/nginx/nginx.conf ]; then
+if [ -f ${WEBROOT}/user/config/nginx/nginx.conf ]; then
   cp ${WEBROOT}/user/config/nginx/nginx.conf /etc/nginx/nginx.conf
 fi
 
-if [ -f ${WEBROOT}/conf/nginx/nginx-site.conf ]; then
+if [ -f ${WEBROOT}/user/config/nginx/nginx-site.conf ]; then
   cp ${WEBROOT}/user/config/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
 fi
 
-if [ -f ${WEBROOT}/conf/nginx/nginx-site-ssl.conf ]; then
+if [ -f ${WEBROOT}/user/config/nginx/nginx-site-ssl.conf ]; then
   cp ${WEBROOT}/user/config/nginx/nginx-site-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
 fi
 
