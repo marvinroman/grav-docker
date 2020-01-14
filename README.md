@@ -1,4 +1,4 @@
-[![pipeline status](https://gitlab.com/marvinroman/grav-docker/badges/0.2.2/pipeline.svg)](https://gitlab.com/marvinroman/grav-docker/commits/0.2.2)
+[![pipeline status](https://gitlab.com/marvinroman/grav-docker/badges/0.2.3/pipeline.svg)](https://gitlab.com/marvinroman/grav-docker/commits/0.2.3)
 
 ![docker hub](https://img.shields.io/docker/pulls/marvinroman/grav-docker.svg?style=flat-square) ![docker hub](https://img.shields.io/docker/stars/marvinroman/grav-docker.svg?style=flat-square)
 
@@ -26,7 +26,7 @@ Looking for testers & contributors to bring this project out of Alpha. If you ha
 | 0.1.7                                 | 0.1.7   | Master Branch              | 1.6.11       | 1.16.0        | 7.3.6       | 3.9            | Alpha (fix for git push to only create .gitignore if it doesn't exist)                             |
 | 0.2.1                                 | 0.2.1   | Master Branch              | 1.6.16       | 1.16.0        | 7.3.6       | 3.9            | Beta (fix for grav admin url when empty)                                                           |
 | 0.2.2                                 | 0.2.2   | Master Branch              | 1.6.16       | 1.16.0        | 7.3.6       | 3.9            | Beta (allow pulling of public repos withour username & password)                                   |
-| latest/0.2.2                          | 0.2.2   | Master Branch              | 1.6.16       | 1.16.1        | 7.3.6       | 3.9            | Beta (allow pulling of public repos withour username & password)                                   |
+| latest/0.2.3                          | 0.2.2   | Master Branch              | 1.6.16       | 1.16.1        | 7.3.6       | 3.9            | Beta (allow pulling of public repos withour username & password)                                   |
 | skeleton-open-publishing-space-v1.5.5 | 0.2.1   | Master Branch              | 1.6.16       | 1.16.1        | 7.3.6       | 3.9            | Alpha                                                                                              |
 | skeleton-learn2-with-git-sync-v1.5.2  | 0.2.1   | Master Branch              | 1.6.16       | 1.16.1        | 7.3.6       | 3.9            | Alpha                                                                                              |
 | develop                               | 0.2     | Develop Branch             | 1.6.16       | 1.16.1        | 7.3.6       | 3.9            | Development                                                                                        |
