@@ -296,7 +296,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
 
 LABEL maintainer="Marvin Roman <marvinroman@protonmail.com>"
-LABEL version="0.1.5"
+LABEL version="0.2.2"
 
 EXPOSE 443 80
 CMD ["/start.sh"]
